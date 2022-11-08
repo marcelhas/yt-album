@@ -46,8 +46,17 @@ if [[ "$chapter_count" == "0" ]]; then
         exit 1
     fi
 
+    # Preprocess chapters.txt into a single file in the format:
+    # 00:00 04:01 No 1 Party Anthem
+    # 04:01 07:11 Suck It and See
+    cut -d" " --field 1 $CHAPTERS > "$TMP/first.txt"
+    tail "$TMP/first.txt" --lines +2 > "$TMP/second.txt"
+    echo "99:59:59" >> "$TMP/second.txt"
+    cut -d" " --field 2- $CHAPTERS > "$TMP/third.txt"
+    paste "$TMP/first.txt" "$TMP/second.txt" "$TMP/third.txt" > "$TMP/out.txt"
+
     while read -r start end out; do
         echo "$start - $end - $out"
         ffmpeg -hide_banner -loglevel warning -nostdin -y -ss "$start" -to "$end" -i "$ALBUM" "out/$out.mp3"
-    done < "$CHAPTERS"
+    done < "$TMP/out.txt"
 fi
