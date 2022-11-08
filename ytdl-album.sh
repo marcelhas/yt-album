@@ -12,6 +12,7 @@ usage() {
 
 Example:
 ./ytdl-album https://www.youtube.com/watch?v=lmvUFhjZdFc
+TRACE=1 ./ytdl-album https://www.youtube.com/watch?v=lmvUFhjZdFc
 '
 }
 
