@@ -32,7 +32,7 @@ rm -rf "$OUT"
 mkdir -p "$OUT"
 
 yt-dlp -x --split-chapters --audio-quality 0 --audio-format mp3                                                        \
-       --quiet --progress --console-title --newline --progress-template "postprocess:[Processing: %(info.title)s ...]" \
+       --quiet --progress --console-title --progress-template "postprocess:[Processing: %(info.title)s ...]" \
        --windows-filenames --restrict-filenames --print-to-file title "$TMP/title.txt"                                                                        \
        -o "$TMP/album.mp3" -o "chapter:$OUT/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s"                          \
        "$URL"
