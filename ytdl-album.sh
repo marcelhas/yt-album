@@ -25,6 +25,7 @@ CHAPTERS="./chapters.txt"
 # TODO: Use script directory instead of hardcoding.
 OUT="./out"
 TMP="$(mktemp -d)"
+trap 'rm -rf -- "$TMP"' EXIT
 URL="$1"
 
 rm -rf "$OUT"
