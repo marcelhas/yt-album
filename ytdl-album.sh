@@ -20,11 +20,11 @@ if [[ -z "${1-}" || "${1-}" =~ ^-*h(elp)?$ ]]; then
     exit
 fi
 
-ALBUM="$TMP/album.mp3"
 CHAPTERS="./chapters.txt"
 # TODO: Use script directory instead of hardcoding.
 OUT="./out"
 TMP="$(mktemp -d)"
+ALBUM="$TMP/album.mp3"
 URL="$1"
 
 rm -rf "$OUT"
