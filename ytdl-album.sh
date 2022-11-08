@@ -69,3 +69,5 @@ if [[ "$CHAPTER_COUNT" == "0" ]]; then
         ((i++))
     done < "$TMP/out.txt"
 fi
+
+printf "Done. Your tracks are in the ./tracks directory.\n"
