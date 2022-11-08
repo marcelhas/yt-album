@@ -21,9 +21,9 @@ if [[ -z "${1-}" || "${1-}" =~ ^-*h(elp)?$ ]]; then
     exit
 fi
 
-CHAPTERS="./chapters.txt"
-# TODO: Use script directory instead of hardcoding.
-OUT="./out"
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+CHAPTERS="$SCRIPT_DIR/chapters.txt"
+OUT="$SCRIPT_DIR/out"
 TMP="$(mktemp -d)"
 trap 'rm -rf -- "$TMP"' EXIT
 URL="$1"
