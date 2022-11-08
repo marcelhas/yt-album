@@ -33,7 +33,7 @@ mkdir -p "$OUT"
 yt-dlp -x --split-chapters --audio-quality 0 --audio-format mp3 \
        --quiet --progress --console-title --newline --progress-template "postprocess:[Processing: %(info.title)s ...]" \
        --windows-filenames --restrict-filenames                 \
-       -o "$ALBUM" -o "chapter:$OUT/%(title)s_%(section_number)03d_%(section_title)s%(ext)s" \
+       -o "$ALBUM" -o "chapter:$OUT/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s" \
        "$URL"
 
 chapter_count="$(find "$OUT" -maxdepth 1 -type f | wc -l)"
