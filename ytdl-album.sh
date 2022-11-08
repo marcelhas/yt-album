@@ -36,8 +36,8 @@ yt-dlp -x --split-chapters --audio-quality 0 --audio-format mp3 \
        -o "$ALBUM" -o "chapter:$OUT/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s" \
        "$URL"
 
+echo
 chapter_count="$(find "$OUT" -maxdepth 1 -type f | wc -l)"
-echo "$chapter_count"
 if [[ "$chapter_count" == "0" ]]; then
     printf "No chapters found, falling back to manual splitting.\n"
     if [[ ! -f $CHAPTERS ]]; then
