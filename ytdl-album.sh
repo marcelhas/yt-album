@@ -51,10 +51,14 @@ if [[ "$CHAPTER_COUNT" == "0" ]]; then
     # Preprocess chapters.txt into a single file in the format:
     # 00:00 04:01 No 1 Party Anthem
     # 04:01 07:11 Suck It and See
-    cut -d" " --field 1 $CHAPTERS > "$TMP/first.txt"
+    # Remove empty lines.
+    clean="$TMP/clean.txt"
+    awk '!/^[[:blank:]]*$/' "$CHAPTERS" > "$clean"
+    cut -d" " --field 1 "$clean" > "$TMP/first.txt"
     tail "$TMP/first.txt" --lines +2 > "$TMP/second.txt"
     echo "99:59:59" >> "$TMP/second.txt"
-    cut -d" " --field 2- $CHAPTERS > "$TMP/third.txt"
+    cut -d" " --field 2- "$clean" > "$TMP/third.txt"
+    # Merge the three files into a single file.
     paste "$TMP/first.txt" "$TMP/second.txt" "$TMP/third.txt" > "$TMP/out.txt"
 
     i=1
