@@ -56,8 +56,11 @@ if [[ "$CHAPTER_COUNT" == "0" ]]; then
     cut -d" " --field 2- $CHAPTERS > "$TMP/third.txt"
     paste "$TMP/first.txt" "$TMP/second.txt" "$TMP/third.txt" > "$TMP/out.txt"
 
+    i=1
     while read -r start end out; do
         echo "$start - $end - $out"
-        ffmpeg -hide_banner -loglevel warning -nostdin -y -ss "$start" -to "$end" -i "$TMP/album.mp3" "out/$ALBUM_TITLE-$out.mp3"
+        track_nr="$(printf %03d $i)"
+        ffmpeg -hide_banner -loglevel warning -nostdin -y -ss "$start" -to "$end" -i "$TMP/album.mp3" "out/$ALBUM_TITLE-$track_nr-$out.mp3"
+        ((i++))
     done < "$TMP/out.txt"
 fi
