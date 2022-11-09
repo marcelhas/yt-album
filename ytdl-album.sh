@@ -21,6 +21,16 @@ if [[ -z "${1-}" || "${1-}" =~ ^-*h(elp)?$ ]]; then
     exit
 fi
 
+cmd_exists_or_exit() {
+    local cmd="$1"
+    if ! command -v "$cmd" &>/dev/null; then
+        printf "%s is not installed. Please install it first.\n" "$cmd" >&2
+        exit 1
+    fi
+}
+
+cmd_exists_or_exit "yt-dlp"
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 CHAPTERS="$SCRIPT_DIR/chapters.txt"
 OUT="$SCRIPT_DIR/tracks"
@@ -42,10 +52,11 @@ ALBUM_TITLE="$(cat "$TMP/title.txt")"
 CHAPTER_COUNT="$(find "$OUT" -maxdepth 1 -type f | wc -l)"
 
 if [[ "$CHAPTER_COUNT" == "0" ]]; then
+    cmd_exists_or_exit "ffmpeg"
     printf "No chapters found, falling back to manual splitting.\n"
     if [[ ! -f $CHAPTERS ]]; then
         printf "No ./chapters.txt file found, aborting.\n" >&2
-        exit 1
+        exit 2
     fi
 
     # Preprocess chapters.txt into a single file in the format:
