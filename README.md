@@ -1,7 +1,7 @@
 # yt-album
 
-A simple bash script that splits Youtube albums by tracks using either
-native Youtube sections or a custom text file.
+A simple bash script that downloads an album from Youtube and splits it
+by tracks using either native Youtube sections or a custom text file.
 
 ## Setup
 
