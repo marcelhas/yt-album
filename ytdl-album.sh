@@ -3,17 +3,17 @@
 set -euo pipefail
 
 # Allows running in debug mode by setting the TRACE environment variable.
-# e.g. <TRACE=1 ./ytdl-album.sh>
+# e.g. <TRACE=1 ./yt-album.sh>
 if [[ "${TRACE-0}" == "1" ]]; then set -o xtrace; fi
 
 usage() {
     printf \
-    'Usage: ./ytdl-album URL
+    'Usage: ./yt-album URL
 
 Examples:
-./ytdl-album https://www.youtube.com/watch?v=lmvUFhjZdFc
+./yt-album https://www.youtube.com/watch?v=lmvUFhjZdFc
 # Debug mode
-TRACE=1 ./ytdl-album https://www.youtube.com/watch?v=lmvUFhjZdFc
+TRACE=1 ./yt-album https://www.youtube.com/watch?v=lmvUFhjZdFc
 
 Required:
  - yt-dlp
@@ -60,7 +60,7 @@ if [[ "$CHAPTER_COUNT" == "0" ]]; then
     cmd_exists_or_exit "ffmpeg"
     printf "No chapters found, falling back to manual splitting.\n"
     if [[ ! -f $CHAPTERS ]]; then
-        printf "No ./chapters.txt file found, aborting.\n" >&2
+        printf "No ./chapters.txt file found. See README.md.\n" >&2
         exit 2
     fi
 
