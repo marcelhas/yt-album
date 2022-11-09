@@ -8,12 +8,12 @@ if [[ "${TRACE-0}" == "1" ]]; then set -o xtrace; fi
 
 usage() {
     printf \
-    'Usage: ./yt-album URL
+    'Usage: ./yt-album.sh URL
 
 Examples:
-./yt-album https://www.youtube.com/watch?v=lmvUFhjZdFc
+./yt-album.sh https://www.youtube.com/watch?v=lmvUFhjZdFc
 # Debug mode
-TRACE=1 ./yt-album https://www.youtube.com/watch?v=lmvUFhjZdFc
+TRACE=1 ./yt-album.sh https://www.youtube.com/watch?v=lmvUFhjZdFc
 
 Required:
  - yt-dlp
