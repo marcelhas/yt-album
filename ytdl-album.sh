@@ -10,9 +10,14 @@ usage() {
     printf \
     'Usage: ./ytdl-album URL
 
-Example:
+Examples:
 ./ytdl-album https://www.youtube.com/watch?v=lmvUFhjZdFc
+# Debug mode
 TRACE=1 ./ytdl-album https://www.youtube.com/watch?v=lmvUFhjZdFc
+
+Required:
+ - yt-dlp
+ - ffmpeg
 '
 }
 
