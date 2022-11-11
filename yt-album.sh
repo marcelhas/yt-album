@@ -30,39 +30,39 @@ Required:
 USAGE
 }
 
-die(){
-    >&2 printf %s\\n "$*"
+die() {
+    printf %s\\n "$*" >&2
     usage
     exit 1
 }
 
 while :; do
     case ${1-} in
-        # Two hyphens ends the options parsing
-        --)
+    # Two hyphens ends the options parsing
+    --)
+        shift
+        break
+        ;;
+    -h | --help | help | "")
+        usage
+        exit
+        ;;
+    --sections)
+        if [[ -n "$2" && -f "$2" ]]; then
+            SECTION_FILE="$2"
             shift
-            break
-            ;;
-        -h|--help|help|"")
-            usage
-            exit
-            ;;
-        --sections)
-            if [[ -n "$2" && -f "$2" ]]; then
-                SECTION_FILE="$2"
-                shift
-            else
-                die "The command option --sections requires a path to a file"
-            fi
-            ;;
-        # Anything remaining that starts with a dash triggers a fatal error
-        -?*)
-            die "The command line option is unknown: " "$1"
-            ;;
-        # Anything remaining is treated as content not a parseable option
-        *)
-            break
-            ;;
+        else
+            die "The command option --sections requires a path to a file"
+        fi
+        ;;
+    # Anything remaining that starts with a dash triggers a fatal error
+    -?*)
+        die "The command line option is unknown: " "$1"
+        ;;
+    # Anything remaining is treated as content not a parseable option
+    *)
+        break
+        ;;
     esac
     shift
 done
@@ -84,7 +84,7 @@ cmd_exists_or_exit "yt-dlp"
 # ffmpeg is only required if a section file is provided.
 [[ -n "${SECTION_FILE-}" ]] && cmd_exists_or_exit "ffmpeg"
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 OUT="$SCRIPT_DIR/sections"
 TMP="$(mktemp -d)"
 CACHE="$SCRIPT_DIR/.cache"
@@ -96,14 +96,14 @@ mkdir -p "$OUT"
 mkdir -p "$CACHE"
 
 # Download and maybe split into sections.
-yt-dlp  -x --audio-quality 0 --audio-format mp3                                     \
-        --split-chapters ${SECTION_FILE:+"--no-split-chapters"}                     \
-        --progress-template "postprocess:[Processing: %(info.title)s ...]"          \
-        --quiet --progress --console-title --windows-filenames --restrict-filenames \
-        --print-to-file title "$TMP/title.txt" --print-to-file id "$TMP/id.txt"     \
-        -o "$CACHE/%(id)s.mp3"                                                      \
-        -o "chapter:$OUT/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s"  \
-        "$URL"
+yt-dlp -x --audio-quality 0 --audio-format mp3 \
+    --split-chapters ${SECTION_FILE:+"--no-split-chapters"} \
+    --progress-template "postprocess:[Processing: %(info.title)s ...]" \
+    --quiet --progress --console-title --windows-filenames --restrict-filenames \
+    --print-to-file title "$TMP/title.txt" --print-to-file id "$TMP/id.txt" \
+    -o "$CACHE/%(id)s.mp3" \
+    -o "chapter:$OUT/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s" \
+    "$URL"
 printf "\n"
 
 if [[ -z "${SECTION_FILE-}" ]]; then
@@ -122,13 +122,13 @@ fi
 # 04:01 07:11 Suck It and See
 # Remove empty lines.
 clean="$TMP/clean.txt"
-awk '!/^[[:blank:]]*$/' "$SECTION_FILE" > "$clean"
-cut -d" " --field 1 "$clean" > "$TMP/first.txt"
-tail "$TMP/first.txt" --lines +2 > "$TMP/second.txt"
-echo "99:59:59" >> "$TMP/second.txt"
-cut -d" " --field 2- "$clean" > "$TMP/third.txt"
+awk '!/^[[:blank:]]*$/' "$SECTION_FILE" >"$clean"
+cut -d" " --field 1 "$clean" >"$TMP/first.txt"
+tail "$TMP/first.txt" --lines +2 >"$TMP/second.txt"
+echo "99:59:59" >>"$TMP/second.txt"
+cut -d" " --field 2- "$clean" >"$TMP/third.txt"
 # Merge the three files into a single file.
-paste "$TMP/first.txt" "$TMP/second.txt" "$TMP/third.txt" > "$TMP/out.txt"
+paste "$TMP/first.txt" "$TMP/second.txt" "$TMP/third.txt" >"$TMP/out.txt"
 
 album_title="$(cat "$TMP/title.txt")"
 id="$(cat "$TMP/id.txt")"
@@ -137,10 +137,10 @@ i=1
 while read -r start end section; do
     echo "$start - $end - $section"
     section_nr="$(printf %03d $i)"
-    ffmpeg  -hide_banner -loglevel warning -nostdin -y \
-            -ss "$start" -to "$end" -codec copy \
-            -i "$CACHE/$id.mp3" "$OUT/$album_title-$section_nr-$section.mp3"
+    ffmpeg -hide_banner -loglevel warning -nostdin -y \
+        -ss "$start" -to "$end" -codec copy \
+        -i "$CACHE/$id.mp3" "$OUT/$album_title-$section_nr-$section.mp3"
     ((i++))
-done < "$TMP/out.txt"
+done <"$TMP/out.txt"
 
 print_success_msg "$OUT"
