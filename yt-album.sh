@@ -96,11 +96,14 @@ mkdir -p "$OUT"
 mkdir -p "$CACHE"
 
 # Download and maybe split into sections.
-yt-dlp -x --split-chapters ${SECTION_FILE:+"--no-split-chapters"} --audio-quality 0 --audio-format mp3                                              \
-       --quiet --progress --console-title --progress-template "postprocess:[Processing: %(info.title)s ...]" \
-       --windows-filenames --restrict-filenames --print-to-file title "$TMP/title.txt" --print-to-file id "$TMP/id.txt"                       \
-       -o "$CACHE/%(id)s.mp3" -o "chapter:$OUT/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s"        \
-       "$URL"
+yt-dlp  -x --audio-quality 0 --audio-format mp3                                     \
+        --split-chapters ${SECTION_FILE:+"--no-split-chapters"}                     \
+        --progress-template "postprocess:[Processing: %(info.title)s ...]"          \
+        --quiet --progress --console-title --windows-filenames --restrict-filenames \
+        --print-to-file title "$TMP/title.txt" --print-to-file id "$TMP/id.txt"     \
+        -o "$CACHE/%(id)s.mp3"                                                      \
+        -o "chapter:$OUT/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s"  \
+        "$URL"
 printf "\n"
 
 if [[ -z "${SECTION_FILE-}" ]]; then
@@ -134,7 +137,9 @@ i=1
 while read -r start end section; do
     echo "$start - $end - $section"
     section_nr="$(printf %03d $i)"
-    ffmpeg -hide_banner -loglevel warning -nostdin -y -ss "$start" -to "$end" -i "$CACHE/$id.mp3" -codec copy "$OUT/$album_title-$section_nr-$section.mp3"
+    ffmpeg  -hide_banner -loglevel warning -nostdin -y \
+            -ss "$start" -to "$end" -codec copy \
+            -i "$CACHE/$id.mp3" "$OUT/$album_title-$section_nr-$section.mp3"
     ((i++))
 done < "$TMP/out.txt"
 
