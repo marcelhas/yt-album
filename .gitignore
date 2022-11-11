@@ -1,3 +1,4 @@
-tracks/
+sections/
 .direnv/
-chapters.txt
+*.txt
+!sections.template.txt

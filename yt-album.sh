@@ -9,18 +9,18 @@ if [[ "${TRACE-0}" == "1" ]]; then set -o xtrace; fi
 usage() {
     cat <<USAGE
 Usage: ./yt-album.sh URL
-   or: ./yt-album.sh --chapters chapters.txt -- URL
-Download from YouTube and split into chapters.
+   or: ./yt-album.sh --sections sections.txt -- URL
+Download from YouTube and split into sections.
 
  -h, --help
     Show this help message and exit.
- -c, --chapters FILE
-    Use the specified file as the chapters file.
+ --sections FILE
+    Split the downloaded video into sections defined in FILE.
     The required format is defined in the README.md.
 
 Examples:
 ./yt-album.sh https://www.youtube.com/watch?v=lmvUFhjZdFc
-./yt-album.sh --chapters chapters.txt -- https://www.youtube.com/watch?v=lmvUFhjZdFc
+./yt-album.sh --sections sections.txt -- https://www.youtube.com/watch?v=lmvUFhjZdFc
 # Debug mode
 TRACE=1 ./yt-album.sh https://www.youtube.com/watch?v=lmvUFhjZdFc
 
@@ -47,12 +47,12 @@ while :; do
             usage
             exit
             ;;
-        -c|--chapters)
+        --sections)
             if [[ -n "$2" && -f "$2" ]]; then
-                CHAPTERS="$2"
+                SECTION_FILE="$2"
                 shift
             else
-                die "The command option --chapters requires a path to a file"
+                die "The command option --sections requires a path to a file"
             fi
             ;;
         # Anything remaining that starts with a dash triggers a fatal error
@@ -77,13 +77,13 @@ cmd_exists_or_exit() {
 
 print_success_msg() {
     local path="$1"
-    printf "Done. Your tracks are in %s.\n" "$path"
+    printf "Done. Your sections are in %s.\n" "$path"
 }
 
 cmd_exists_or_exit "yt-dlp"
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-OUT="$SCRIPT_DIR/tracks"
+OUT="$SCRIPT_DIR/sections"
 TMP="$(mktemp -d)"
 trap 'rm -rf -- "$TMP"' EXIT
 URL="$1"
@@ -91,15 +91,15 @@ URL="$1"
 rm -rf "$OUT"
 mkdir -p "$OUT"
 
-# Download and maybe split into chapters.
-yt-dlp -x --split-chapters ${CHAPTERS:+"--no-split-chapters"} --audio-quality 0 --audio-format mp3                                              \
+# Download and maybe split into sections.
+yt-dlp -x --split-chapters ${SECTION_FILE:+"--no-split-chapters"} --audio-quality 0 --audio-format mp3                                              \
        --quiet --progress --console-title --progress-template "postprocess:[Processing: %(info.title)s ...]" \
        --windows-filenames --restrict-filenames --print-to-file title "$TMP/title.txt"                       \
        -o "$TMP/album.mp3" -o "chapter:$OUT/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s"        \
        "$URL"
 printf "\n"
 
-if [[ -z "$CHAPTERS" ]]; then
+if [[ -z "$SECTION_FILE" ]]; then
     # Done.
     print_success_msg "$OUT"
     exit 0
@@ -107,20 +107,19 @@ fi
 
 ALBUM_TITLE="$(cat "$TMP/title.txt")"
 
-# Split downloaded file into chapters.
+# Split downloaded file into sections.
 cmd_exists_or_exit "ffmpeg"
-printf "No chapters found, falling back to manual splitting.\n"
-if [[ ! -f $CHAPTERS ]]; then
-    printf "No ./chapters.txt file found. See README.md.\n" >&2
+if [[ ! -f $SECTION_FILE ]]; then
+    printf "%s is not a file! See README.md.\n" "$SECTION_FILE" >&2
     exit 2
 fi
 
-# Preprocess chapters.txt into a single file in the format:
+# Preprocess $SECTION_FILE into a single file in the format:
 # 00:00 04:01 No 1 Party Anthem
 # 04:01 07:11 Suck It and See
 # Remove empty lines.
 clean="$TMP/clean.txt"
-awk '!/^[[:blank:]]*$/' "$CHAPTERS" > "$clean"
+awk '!/^[[:blank:]]*$/' "$SECTION_FILE" > "$clean"
 cut -d" " --field 1 "$clean" > "$TMP/first.txt"
 tail "$TMP/first.txt" --lines +2 > "$TMP/second.txt"
 echo "99:59:59" >> "$TMP/second.txt"
@@ -129,10 +128,10 @@ cut -d" " --field 2- "$clean" > "$TMP/third.txt"
 paste "$TMP/first.txt" "$TMP/second.txt" "$TMP/third.txt" > "$TMP/out.txt"
 
 i=1
-while read -r start end track; do
-    echo "$start - $end - $track"
-    track_nr="$(printf %03d $i)"
-    ffmpeg -hide_banner -loglevel warning -nostdin -y -ss "$start" -to "$end" -i "$TMP/album.mp3" "$OUT/$ALBUM_TITLE-$track_nr-$track.mp3"
+while read -r start end section; do
+    echo "$start - $end - $section"
+    section_nr="$(printf %03d $i)"
+    ffmpeg -hide_banner -loglevel warning -nostdin -y -ss "$start" -to "$end" -i "$TMP/album.mp3" "$OUT/$ALBUM_TITLE-$section_nr-$section.mp3"
     ((i++))
 done < "$TMP/out.txt"
 

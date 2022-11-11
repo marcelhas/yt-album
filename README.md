@@ -1,7 +1,6 @@
 # yt-album
 
-A simple bash script that downloads an album from Youtube and splits it
-by tracks using either native Youtube sections or a custom text file.
+Download an album from Youtube and split it into sections.
 
 ## Setup
 
@@ -27,21 +26,21 @@ direnv allow
 
 In most cases, you can simply run the following command as Youtube
 provides section information for many albums.
-Your tracks will be placed into `./tracks/`.
+Your sections will be placed into `./sections/`.
 
 ```bash
 ./yt-album.sh https://www.youtube.com/watch?v=lmvUFhjZdFc
 ```
 
 If Youtube does not provide section information then you need to manually
-define how to split the album into tracks.
+define how to split the album into sections.
 Have a look at the comment section/description of your album, often there
 will be a comment in the correct format.
 
-Copy `chapters.template.txt` to `chapters.txt` and make your edits,
+Copy `sections.template.txt` and make your edits,
 while following the format. Empty lines are ignored.
 
-> (hh:)mm:ss \<Track name\>
+> (hh:)mm:ss \<Section name\>
 
 ```plain
 00:00 No 1 Party Anthem
