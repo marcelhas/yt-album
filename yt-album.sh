@@ -85,17 +85,19 @@ cmd_exists_or_exit "yt-dlp"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 OUT="$SCRIPT_DIR/sections"
 TMP="$(mktemp -d)"
+CACHE="$SCRIPT_DIR/.cache"
 trap 'rm -rf -- "$TMP"' EXIT
 URL="$1"
 
 rm -rf "$OUT"
 mkdir -p "$OUT"
+mkdir -p "$CACHE"
 
 # Download and maybe split into sections.
 yt-dlp -x --split-chapters ${SECTION_FILE:+"--no-split-chapters"} --audio-quality 0 --audio-format mp3                                              \
        --quiet --progress --console-title --progress-template "postprocess:[Processing: %(info.title)s ...]" \
-       --windows-filenames --restrict-filenames --print-to-file title "$TMP/title.txt"                       \
-       -o "$TMP/album.mp3" -o "chapter:$OUT/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s"        \
+       --windows-filenames --restrict-filenames --print-to-file title "$TMP/title.txt" --print-to-file id "$TMP/id.txt"                       \
+       -o "$CACHE/%(id)s.mp3" -o "chapter:$OUT/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s"        \
        "$URL"
 printf "\n"
 
@@ -131,7 +133,8 @@ i=1
 while read -r start end section; do
     echo "$start - $end - $section"
     section_nr="$(printf %03d $i)"
-    ffmpeg -hide_banner -loglevel warning -nostdin -y -ss "$start" -to "$end" -i "$TMP/album.mp3" "$OUT/$ALBUM_TITLE-$section_nr-$section.mp3"
+    ID="$(cat "$TMP/id.txt")"
+    ffmpeg -hide_banner -loglevel warning -nostdin -y -ss "$start" -to "$end" -i "$CACHE/$ID.mp3" "$OUT/$ALBUM_TITLE-$section_nr-$section.mp3"
     ((i++))
 done < "$TMP/out.txt"
 

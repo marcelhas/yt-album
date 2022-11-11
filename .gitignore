@@ -2,3 +2,4 @@ sections/
 .direnv/
 *.txt
 !sections.template.txt
+.cache/
