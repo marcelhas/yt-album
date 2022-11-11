@@ -99,7 +99,7 @@ yt-dlp -x --split-chapters ${SECTION_FILE:+"--no-split-chapters"} --audio-qualit
        "$URL"
 printf "\n"
 
-if [[ -z "$SECTION_FILE" ]]; then
+if [[ -z "${SECTION_FILE-}" ]]; then
     # Done.
     print_success_msg "$OUT"
     exit 0
