@@ -81,7 +81,7 @@ if [[ "$CHAPTER_COUNT" == "0" ]]; then
     while read -r start end track; do
         echo "$start - $end - $track"
         track_nr="$(printf %03d $i)"
-        ffmpeg -hide_banner -loglevel warning -nostdin -y -ss "$start" -to "$end" -i "$TMP/album.mp3" "out/$ALBUM_TITLE-$track_nr-$track.mp3"
+        ffmpeg -hide_banner -loglevel warning -nostdin -y -ss "$start" -to "$end" -i "$TMP/album.mp3" "$OUT/$ALBUM_TITLE-$track_nr-$track.mp3"
         ((i++))
     done < "$TMP/out.txt"
 fi
