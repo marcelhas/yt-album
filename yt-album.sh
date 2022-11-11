@@ -6,6 +6,23 @@ set -euo pipefail
 # e.g. <TRACE=1 ./yt-album.sh>
 if [[ "${TRACE-0}" == "1" ]]; then set -o xtrace; fi
 
+RESET=$(tput sgr0)
+GREEN=$(tput setaf 2)
+YELLOW=$(tput setaf 3)
+RED=$(tput setaf 1)
+
+log_succ() {
+    printf "${GREEN}%s${RESET}\n" "${*}"
+}
+
+log_warn() {
+    printf "${YELLOW}%s${RESET}\n" "${*}" 1>&2
+}
+
+log_err() {
+    printf "${RED}%s${RESET}\n" "${*}" 1>&2
+}
+
 usage() {
     cat <<USAGE
 Usage: ./yt-album.sh URL
@@ -31,7 +48,7 @@ USAGE
 }
 
 die() {
-    printf %s\\n "$*" >&2
+    log_err "${*}"
     usage
     exit 1
 }
@@ -57,7 +74,7 @@ while :; do
         ;;
     # Anything remaining that starts with a dash triggers a fatal error
     -?*)
-        die "The command line option is unknown: " "$1"
+        die "The command line option is unknown: $1"
         ;;
     # Anything remaining is treated as content not a parseable option
     *)
@@ -70,14 +87,14 @@ done
 cmd_exists_or_exit() {
     local cmd="$1"
     if ! command -v "$cmd" &>/dev/null; then
-        printf "%s is not installed. Please install it first.\n" "$cmd" >&2
+        log_err "$cmd is not installed. Please install it first."
         exit 1
     fi
 }
 
 print_success_msg() {
     local path="$1"
-    printf "Done. Your sections are in %s.\n" "$path"
+    log_succ "Done. Your sections are in $path."
 }
 
 cmd_exists_or_exit "yt-dlp"
@@ -113,7 +130,7 @@ if [[ -z "${SECTION_FILE-}" ]]; then
 fi
 
 if [[ ! -f $SECTION_FILE ]]; then
-    printf "%s is not a file! See README.md.\n" "$SECTION_FILE" >&2
+    log_err "$SECTION_FILE is not a file! See README.md."
     exit 2
 fi
 
@@ -148,8 +165,8 @@ while read -r start end section; do
     minimum_size=5000
     actual_size=$(wc -c <"$section")
     if [[ $actual_size -lt $minimum_size ]]; then
-        printf "File is very small! Check if %s matches your video.\n" \
-            "$SECTION_FILE" >&2
+        log_warn \
+            "File is very small! Check if $SECTION_FILE matches your video."
     fi
 done <"$TMP/out.txt"
 
