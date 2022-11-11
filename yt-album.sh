@@ -137,11 +137,20 @@ i=1
 while read -r start end section; do
     echo "$start - $end - $section"
     section_nr="$(printf %03d $i)"
+    ((i++))
+    section="$OUT/$album_title-$section_nr-$section.mp3"
     ffmpeg -hide_banner -loglevel warning -nostdin -y \
         -ss "$start" -to "$end" \
         -i "$CACHE/$id.mp3" -codec copy \
-        "$OUT/$album_title-$section_nr-$section.mp3"
-    ((i++))
+        "$section"
+
+    # Sanity check filesize, because ffmpeg does not always warn.
+    minimum_size=5000
+    actual_size=$(wc -c <"$section")
+    if [[ $actual_size -lt $minimum_size ]]; then
+        printf "File is very small! Check if %s matches your video.\n" \
+            "$SECTION_FILE" >&2
+    fi
 done <"$TMP/out.txt"
 
 print_success_msg "$OUT"
