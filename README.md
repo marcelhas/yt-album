@@ -24,13 +24,11 @@ direnv allow
 
 > Make sure that URLs do not contain any weird backslashes.
 
-In most cases, you can simply run the following command as Youtube
-provides section information for many albums.
-Your sections will be placed into `./sections/`.
-
 ```bash
 ./yt-album.sh https://www.youtube.com/watch?v=lmvUFhjZdFc
 ```
+
+Your sections will be placed into `./sections/`.
 
 If Youtube does not provide section information then you need to manually
 define how to split the album into sections.
@@ -38,7 +36,7 @@ Have a look at the comment section/description of your album, often there
 will be a comment in the correct format.
 
 Copy `sections.template.txt` and make your edits,
-while following the format. Empty lines are ignored.
+while following its format. Empty lines are ignored.
 
 > (hh:)mm:ss \<Section name\>
 
