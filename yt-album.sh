@@ -81,6 +81,8 @@ print_success_msg() {
 }
 
 cmd_exists_or_exit "yt-dlp"
+# ffmpeg is only required if a section file is provided.
+[[ -n "${SECTION_FILE-}" ]] && cmd_exists_or_exit "ffmpeg"
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 OUT="$SCRIPT_DIR/sections"
@@ -107,10 +109,6 @@ if [[ -z "${SECTION_FILE-}" ]]; then
     exit 0
 fi
 
-ALBUM_TITLE="$(cat "$TMP/title.txt")"
-
-# Split downloaded file into sections.
-cmd_exists_or_exit "ffmpeg"
 if [[ ! -f $SECTION_FILE ]]; then
     printf "%s is not a file! See README.md.\n" "$SECTION_FILE" >&2
     exit 2
@@ -129,12 +127,14 @@ cut -d" " --field 2- "$clean" > "$TMP/third.txt"
 # Merge the three files into a single file.
 paste "$TMP/first.txt" "$TMP/second.txt" "$TMP/third.txt" > "$TMP/out.txt"
 
+album_title="$(cat "$TMP/title.txt")"
+id="$(cat "$TMP/id.txt")"
 i=1
+# Split the downloaded video into sections.
 while read -r start end section; do
     echo "$start - $end - $section"
     section_nr="$(printf %03d $i)"
-    ID="$(cat "$TMP/id.txt")"
-    ffmpeg -hide_banner -loglevel warning -nostdin -y -ss "$start" -to "$end" -i "$CACHE/$ID.mp3" "$OUT/$ALBUM_TITLE-$section_nr-$section.mp3"
+    ffmpeg -hide_banner -loglevel warning -nostdin -y -ss "$start" -to "$end" -i "$CACHE/$id.mp3" "$OUT/$album_title-$section_nr-$section.mp3"
     ((i++))
 done < "$TMP/out.txt"
 
