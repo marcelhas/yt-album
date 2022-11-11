@@ -138,8 +138,9 @@ while read -r start end section; do
     echo "$start - $end - $section"
     section_nr="$(printf %03d $i)"
     ffmpeg -hide_banner -loglevel warning -nostdin -y \
-        -ss "$start" -to "$end" -codec copy \
-        -i "$CACHE/$id.mp3" "$OUT/$album_title-$section_nr-$section.mp3"
+        -ss "$start" -to "$end" \
+        -i "$CACHE/$id.mp3" -codec copy \
+        "$OUT/$album_title-$section_nr-$section.mp3"
     ((i++))
 done <"$TMP/out.txt"
 
