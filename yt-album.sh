@@ -34,15 +34,18 @@ Usage: ./yt-album.sh URL
    or: ./yt-album.sh --sections sections.txt -- URL
 Download from YouTube and split into sections.
 
- -h, --help
+Options:
+  -h, --help
     Show this help message and exit.
- --sections FILE
+  --sections FILE
     Split the downloaded video into sections defined in FILE.
     The required format is defined in the README.md.
+  --no-color
+    Disable colored output.
 
 Examples:
-./yt-album.sh https://www.youtube.com/watch?v=lmvUFhjZdFc
-./yt-album.sh --sections sections.txt -- https://www.youtube.com/watch?v=lmvUFhjZdFc
+  ./yt-album.sh https://www.youtube.com/watch?v=lmvUFhjZdFc
+  ./yt-album.sh --sections sections.txt -- https://www.youtube.com/watch?v=lmvUFhjZdFc
 # Debug mode
 TRACE=1 ./yt-album.sh https://www.youtube.com/watch?v=lmvUFhjZdFc
 
@@ -76,6 +79,12 @@ while :; do
         else
             die "The command option --sections requires a path to a file"
         fi
+        ;;
+    --no-color)
+        GREEN=""
+        YELLOW=""
+        RED=""
+        RESET=""
         ;;
     # Anything remaining that starts with a dash triggers a fatal error
     -?*)
