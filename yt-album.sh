@@ -23,6 +23,11 @@ log_err() {
     printf "${RED}%s${RESET}\n" "${*}" 1>&2
 }
 
+log_success_msg() {
+    local path="$1"
+    log_succ "Done. Your sections are in $path."
+}
+
 usage() {
     cat <<USAGE
 Usage: ./yt-album.sh URL
@@ -92,11 +97,6 @@ cmd_exists_or_exit() {
     fi
 }
 
-print_success_msg() {
-    local path="$1"
-    log_succ "Done. Your sections are in $path."
-}
-
 cmd_exists_or_exit "yt-dlp"
 # ffmpeg is only required if a section file is provided.
 [[ -n "${SECTION_FILE-}" ]] && cmd_exists_or_exit "ffmpeg"
@@ -125,7 +125,7 @@ printf "\n"
 
 if [[ -z "${SECTION_FILE-}" ]]; then
     # Done.
-    print_success_msg "$OUT"
+    log_success_msg "$OUT"
     exit 0
 fi
 
@@ -170,4 +170,4 @@ while read -r start end section; do
     fi
 done <"$TMP/out.txt"
 
-print_success_msg "$OUT"
+log_success_msg "$OUT"
