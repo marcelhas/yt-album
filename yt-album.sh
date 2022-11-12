@@ -70,7 +70,7 @@ while :; do
         exit
         ;;
     --sections)
-        if [[ -n "$2" && -f "$2" ]]; then
+        if [[ -n "$2" ]]; then
             SECTION_FILE="$2"
             shift
         else
@@ -97,9 +97,27 @@ cmd_exists_or_exit() {
     fi
 }
 
+valid_section_file_or_exit() {
+    local file="$1"
+    if [[ ! -f "$file" ]]; then
+        log_err "The section file $file does not exist."
+        exit 2
+    fi
+    set +e
+    res="$(grep --perl-regexp --line-number --initial-tab --invert-match \
+        "^(\d+:)?(0|1|2|3|4|5)?\d:(0|1|2|3|4|5)\d\s.*$" "$file")"
+    set -e
+    if [[ $res != "" ]]; then
+        log_err "The following lines in $file are not in the correct format."
+        log_warn "The correct format is: <(hh:)mm:ss Title>"
+        log_err "$res"
+        exit 3
+    fi
+}
+
 cmd_exists_or_exit "yt-dlp"
 # ffmpeg is only required if a section file is provided.
-[[ -n "${SECTION_FILE-}" ]] && cmd_exists_or_exit "ffmpeg"
+[[ -n "${SECTION_FILE-}" ]] && cmd_exists_or_exit "ffmpeg" && valid_section_file_or_exit "$SECTION_FILE"
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 OUT="$SCRIPT_DIR/sections"
@@ -127,11 +145,6 @@ if [[ -z "${SECTION_FILE-}" ]]; then
     # Done.
     log_success_msg "$OUT"
     exit 0
-fi
-
-if [[ ! -f $SECTION_FILE ]]; then
-    log_err "$SECTION_FILE is not a file! See README.md."
-    exit 2
 fi
 
 # Preprocess $SECTION_FILE into a single file in the format:
