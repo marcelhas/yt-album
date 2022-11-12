@@ -6,10 +6,10 @@ set -euo pipefail
 # e.g. <TRACE=1 ./yt-album.sh>
 if [[ "${TRACE-0}" == "1" ]]; then set -o xtrace; fi
 
-RESET=$(tput sgr0)
 GREEN=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 RED=$(tput setaf 1)
+RESET=$(tput sgr0)
 
 log_succ() {
     printf "${GREEN}%s${RESET}\n" "${*}"
