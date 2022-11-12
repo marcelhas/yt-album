@@ -104,6 +104,7 @@ valid_section_file_or_exit() {
         exit 2
     fi
     set +e
+    local res
     res="$(grep --perl-regexp --line-number --initial-tab --invert-match \
         "^(\d+:)?(0|1|2|3|4|5)?\d:(0|1|2|3|4|5)\d\s.*$" "$file")"
     set -e
