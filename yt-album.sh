@@ -108,10 +108,8 @@ cmd_exists_or_exit() {
 
 valid_section_file_or_exit() {
     local file="$1"
-    if [[ ! -f "$file" ]]; then
-        log_err "The section file $file does not exist."
-        exit 2
-    fi
+    [[ ! -f "$file" ]] && log_err "The section file $file does not exist." && exit 2
+    [[ ! -s "$file" ]] && log_err "The section file $file is empty." && exit 2
     set +e
     local res
     res="$(grep --perl-regexp --line-number --initial-tab --invert-match \
