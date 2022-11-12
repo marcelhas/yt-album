@@ -119,24 +119,25 @@ cmd_exists_or_exit "yt-dlp"
 # ffmpeg is only required if a section file is provided.
 [[ -n "${SECTION_FILE-}" ]] && cmd_exists_or_exit "ffmpeg" && valid_section_file_or_exit "$SECTION_FILE"
 
+readonly URL="$1"
+readonly EXT="mp3"
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-OUT="$SCRIPT_DIR/sections"
+readonly OUT="$SCRIPT_DIR/sections"
+readonly CACHE="$SCRIPT_DIR/.cache"
 TMP="$(mktemp -d)"
-CACHE="$SCRIPT_DIR/.cache"
 trap 'rm -rf -- "$TMP"' EXIT
-URL="$1"
 
 rm -rf "$OUT"
 mkdir -p "$OUT"
 mkdir -p "$CACHE"
 
 # Download and maybe split into sections.
-yt-dlp -x --audio-quality 0 --audio-format mp3 \
+yt-dlp -x --audio-quality 0 --audio-format "$EXT" \
     --split-chapters ${SECTION_FILE:+"--no-split-chapters"} \
     --progress-template "postprocess:[Processing: %(info.title)s ...]" \
     --quiet --progress --console-title --windows-filenames --restrict-filenames \
     --print-to-file title "$TMP/title.txt" --print-to-file id "$TMP/id.txt" \
-    -o "$CACHE/%(id)s.mp3" \
+    -o "$CACHE/%(id)s.$EXT" \
     -o "chapter:$OUT/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s" \
     "$URL"
 printf "\n"
@@ -151,7 +152,7 @@ fi
 # 00:00 04:01 No 1 Party Anthem
 # 04:01 07:11 Suck It and See
 # Remove empty lines.
-clean="$TMP/clean.txt"
+readonly clean="$TMP/clean.txt"
 awk '!/^[[:blank:]]*$/' "$SECTION_FILE" >"$clean"
 cut -d" " --field 1 "$clean" >"$TMP/first.txt"
 tail "$TMP/first.txt" --lines +2 >"$TMP/second.txt"
@@ -160,27 +161,38 @@ cut -d" " --field 2- "$clean" >"$TMP/third.txt"
 # Merge the three files into a single file.
 paste "$TMP/first.txt" "$TMP/second.txt" "$TMP/third.txt" >"$TMP/out.txt"
 
+format_section_title() {
+    local album_title="$1"
+    local section_nr
+    printf -v section_nr '$%03d' "$2"
+    local section_name="$3"
+    local section_title="${album_title}_${section_nr}_${section_name}"
+    local clean_section_title
+    clean_section_title="$(printf "%s" "$section_title" | tr -cs '[:alnum:]-' '_' | sed 's/_*$//')"
+    printf "%s.$EXT" "$clean_section_title"
+}
+
 album_title="$(cat "$TMP/title.txt")"
 id="$(cat "$TMP/id.txt")"
 i=1
 # Split the downloaded video into sections.
-while read -r start end section; do
-    echo "$start - $end - $section"
-    section_nr="$(printf %03d $i)"
-    ((i++))
-    section="$OUT/$album_title-$section_nr-$section.mp3"
+while read -r start end section_name; do
+    echo "$start - $end - $section_name"
+    section_title="$(format_section_title "$album_title" "$i" "$section_name")"
+    target_file="$OUT/$section_title"
     ffmpeg -hide_banner -loglevel warning -nostdin -y \
         -ss "$start" -to "$end" \
-        -i "$CACHE/$id.mp3" -codec copy \
-        "$section"
+        -i "$CACHE/$id.$EXT" -codec copy \
+        "$target_file"
 
     # Sanity check filesize, because ffmpeg does not always warn.
     minimum_size=5000
-    actual_size=$(wc -c <"$section")
+    actual_size=$(wc -c <"$target_file")
     if [[ $actual_size -lt $minimum_size ]]; then
         log_warn \
             "File is very small! Check if $SECTION_FILE matches your video."
     fi
+    ((i++))
 done <"$TMP/out.txt"
 
 log_success_msg "$OUT"
