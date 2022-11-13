@@ -1,2 +1,2 @@
 [Processing: Arctic Monkeys - Acoustic 15 (Full Album) ...][Processing: Arctic Monkeys - Acoustic 15 (Full Album) ...][Processing: Arctic Monkeys - Acoustic 15 (Full Album) ...][Processing: Arctic Monkeys - Acoustic 15 (Full Album) ...][Processing: Arctic Monkeys - Acoustic 15 (Full Album) ...][Processing: Arctic Monkeys - Acoustic 15 (Full Album) ...]
-Done. Your sections are in /home/marcel/src/yt-album/sections.
+Done. Your sections are in ./sections.

@@ -24,8 +24,9 @@ log_err() {
 }
 
 log_success_msg() {
-    local path="$1"
-    log_succ "Done. Your sections are in $path."
+    local path
+    path="$(basename "$1")"
+    log_succ "Done. Your sections are in ./$path."
 }
 
 usage() {
