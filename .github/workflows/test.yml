@@ -10,6 +10,4 @@ jobs:
       - uses: cachix/install-nix-action@v18
         with:
           nix_path: nixpkgs=channel:nixos-unstable
-      - run: toe
-      - run: toe /usr/share/terminfo
-      - run: find ${TERMINFO:-/usr/share/terminfo}
+      - run: TERM=xterm nix run .#test
