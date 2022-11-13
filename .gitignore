@@ -4,3 +4,4 @@ sections/
 !tests/**/*.txt
 !sections.template.txt
 .cache/
+result
