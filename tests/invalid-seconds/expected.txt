@@ -1,0 +1,10 @@
+The following lines in tests/invalid-seconds/sections.txt are not in the correct format.
+The correct format is: <(hh:)mm:ss Title>
+  1:	0000 Missing colon
+  2:	00:0 Missing digit
+  3:	00:000 Too many digits
+  4:	00:0 0 Invalid space
+  5:	00:-0 Invalid -
+  6:	00:a0 Invalid character
+  7:	00:0a Invalid character
+  8:	00:60 Invalid first digit

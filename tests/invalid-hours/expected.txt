@@ -1,0 +1,7 @@
+The following lines in tests/invalid-hours/sections.txt are not in the correct format.
+The correct format is: <(hh:)mm:ss Title>
+  1:	0000:00 Missing colon
+  3:	-0:59:00 Invalid -
+  4:	a0:00:00 Invalid character
+  5:	0a:00:00 Invalid character
+  6:	a00:00:00 Invalid character

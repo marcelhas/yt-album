@@ -1,0 +1,8 @@
+The following lines in tests/invalid-minutes/sections.txt are not in the correct format.
+The correct format is: <(hh:)mm:ss Title>
+  1:	0000 Missing colon
+  3:	999:00 Too many digits
+  4:	-59:00 Invalid -
+  5:	a0:00 Invalid character
+  6:	0a:00 Invalid character
+  7:	99:00 Invalid minutes

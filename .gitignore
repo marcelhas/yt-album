@@ -1,5 +1,6 @@
 sections/
 .direnv/
 *.txt
+!tests/**/*.txt
 !sections.template.txt
 .cache/

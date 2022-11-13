@@ -1,0 +1,7 @@
+0000 Missing colon
+0:00 Missing digit
+999:00 Too many digits
+-59:00 Invalid -
+a0:00 Invalid character
+0a:00 Invalid character
+99:00 Invalid minutes

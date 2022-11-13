@@ -1,0 +1,8 @@
+0000 Missing colon
+00:0 Missing digit
+00:000 Too many digits
+00:0 0 Invalid space
+00:-0 Invalid -
+00:a0 Invalid character
+00:0a Invalid character
+00:60 Invalid first digit
