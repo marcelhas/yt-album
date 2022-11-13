@@ -6,28 +6,13 @@ set -euo pipefail
 # e.g. <TRACE=1 ./yt-album.sh>
 if [[ "${TRACE-0}" == "1" ]]; then set -o xtrace; fi
 
-COLOR=1
 GREEN=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 RED=$(tput setaf 1)
 RESET=$(tput sgr0)
 
-log_succ() {
-    printf "${GREEN}%s${RESET}\n" "${*}"
-}
-
-log_warn() {
-    printf "${YELLOW}%s${RESET}\n" "${*}" 1>&2
-}
-
-log_err() {
-    printf "${RED}%s${RESET}\n" "${*}" 1>&2
-}
-
-log_success_msg() {
-    local path="$1"
-    log_succ "Done. Your sections are in $path."
-}
+# Placeholder for an empty URL.
+URL="https://www.youtube.com/watch?v=lmvUFhjZdFc"
 
 usage() {
     cat <<USAGE
@@ -70,7 +55,6 @@ while :; do
         VERBOSE=1
         ;;
     --no-color)
-        COLOR=0
         GREEN=""
         YELLOW=""
         RED=""
@@ -88,58 +72,109 @@ while :; do
     shift
 done
 
-# Placeholder for the URL.
-URL="https://www.youtube.com/watch?v=lmvUFhjZdFc"
+main() {
+    log_header
+    local test_number=1
+    local exit_code=0
+    for folder in tests/*; do
+        [[ -f "$folder" ]] && continue
 
-count="$(find tests/* -maxdepth 1 -type d | wc -l)"
-# See <https://testanything.org/>.
-printf "%s\n" "TAP version 14"
-printf "%s\n" "1..$count"
-i=1
-ret=0
-for folder in tests/*; do
-    [[ -f "$folder" ]] && continue
-    dir_name="$(basename "$folder")"
-    if [[ -f "$folder"/sections.txt ]]; then
-        set +e
-        diff=$(diff --color=${COLOR:+"always"} <(./yt-album.sh --no-color --sections "$folder/sections.txt" -- "$URL" 2>&1) "$folder/expected.txt")
-        set -e
-        if [[ -z "$diff" ]]; then
-            log_succ "ok $i - $dir_name"
-        else
-            ret=1
-            log_err "not ok $i - $dir_name"
-            [[ -n "${VERBOSE-}" ]] && printf "  ---\n" && printf "%s\n" "$diff" | sed 's/^/  /'
-        fi
-        ((i++))
+        test "$test_number" "$folder" || exit_code=$?
+
+        ((test_number++))
+    done
+
+    exit $exit_code
+}
+
+test() {
+    local test_number="$1"
+    local folder="$2"
+
+    local sections_file
+    local url
+    [[ -f "$folder/sections.txt" ]] && sections_file="$folder/sections.txt"
+    [[ -f "$folder/url.txt" ]] && url=$(cat "$folder/url.txt")
+
+    local expected
+    expected=$(cat "$folder/expected.txt")
+    local actual
+    actual="$(yt-album "${sections_file-}" "${url-}")"
+
+    local expected_ls
+    local actual_ls
+    if [[ -f "$folder/ls.txt" ]]; then
+        expected_ls="$(cat "$folder/ls.txt")"
+        actual_ls="$(ls sections)"
     fi
 
-    if [[ -f "$folder"/url.txt ]]; then
-        url=$(cat "$folder"/url.txt)
-        set +e
-        output_diff=$(diff --color=${COLOR:+"always"} <(./yt-album.sh --no-color -- "$url" 2>&1) "$folder/expected.txt")
-        ls_diff=$(diff --color=${COLOR:+"always"} <(ls ./sections) "$folder/ls.txt")
-        set -e
-        if [[ -z "$output_diff" && -z "$ls_diff" ]]; then
-            log_succ "ok $i - $dir_name"
-        else
-            ret=1
-            log_err "not ok $i - $dir_name"
-
-            if [[ -n "${VERBOSE-}" && -n $output_diff ]]; then
-                printf "  ---\n"
-                printf "  %s\n" "$folder/expected.txt"
-                printf "%s\n" "$output_diff" | sed 's/^/  /'
-            fi
-
-            if [[ -n "${VERBOSE-}" && -n $ls_diff ]]; then
-                printf "  ---\n"
-                printf "  %s\n" "$folder/ls.txt"
-                printf "%s\n" "$ls_diff" | sed 's/^/  /'
-            fi
-        fi
-        ((i++))
+    if ! is_ok "$expected" "$actual"; then
+        log_not_ok "$test_number" "$folder" "$expected" "$actual"
+        (exit 1)
+    elif ! is_ok "${expected_ls-}" "${actual_ls-}"; then
+        log_not_ok "$test_number" "$folder" "${expected_ls-}" "${actual_ls-}"
+        (exit 2)
+    else
+        log_ok "$test_number" "$folder"
+        (exit 0)
     fi
-done
+}
 
-exit $ret
+yt-album() {
+    local sections_file="$1"
+    local url="$2"
+    if [[ -n "${sections_file-}" ]]; then
+        ./yt-album.sh --no-color --sections "$sections_file" -- "$URL" 2>&1
+    else
+        ./yt-album.sh --no-color -- "$url" 2>&1
+    fi
+}
+
+is_ok() {
+    local expected="$1"
+    local actual="$2"
+    [[ "$actual" == "$expected" ]]
+}
+
+log_ok() {
+    local test_number="$1"
+    local test_name="$2"
+    printf "${GREEN}ok %s:${RESET} %s\n" "$test_number" "$test_name"
+}
+
+log_not_ok() {
+    local test_number="$1"
+    local test_name="$2"
+    local expected="$3"
+    local actual="$4"
+
+    printf "${RED}not ok %s:${RESET} %s\n" "$test_number" "$test_name"
+    if [[ -n "${VERBOSE-}" ]]; then
+        log_err "---"
+        log_warn "Expected:"
+        log_succ "$expected"
+        log_warn "Actual:"
+        log_err "$actual"
+    fi
+}
+
+log_header() {
+    count="$(find tests/* -maxdepth 1 -type d | wc -l)"
+    # See <https://testanything.org/>.
+    printf "%s\n" "TAP version 14"
+    printf "%s\n" "1..$count"
+}
+
+log_succ() {
+    printf "${GREEN}%s${RESET}\n" "${*}"
+}
+
+log_warn() {
+    printf "${YELLOW}%s${RESET}\n" "${*}" 1>&2
+}
+
+log_err() {
+    printf "${RED}%s${RESET}\n" "${*}" 1>&2
+}
+
+main
