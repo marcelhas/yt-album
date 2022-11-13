@@ -96,6 +96,7 @@ count="$(find tests/* -maxdepth 1 -type d | wc -l)"
 printf "%s\n" "TAP version 14"
 printf "%s\n" "1..$count"
 i=1
+ret=0
 for folder in tests/*; do
     [[ -f "$folder" ]] && continue
     dir_name="$(basename "$folder")"
@@ -106,6 +107,7 @@ for folder in tests/*; do
         if [[ -z "$diff" ]]; then
             log_succ "ok $i - $dir_name"
         else
+            ret=1
             log_err "not ok $i - $dir_name"
             [[ -n "${VERBOSE-}" ]] && printf "  ---\n" && printf "%s\n" "$diff" | sed 's/^/  /'
         fi
@@ -121,6 +123,7 @@ for folder in tests/*; do
         if [[ -z "$output_diff" && -z "$ls_diff" ]]; then
             log_succ "ok $i - $dir_name"
         else
+            ret=1
             log_err "not ok $i - $dir_name"
 
             if [[ -n "${VERBOSE-}" && -n $output_diff ]]; then
@@ -138,3 +141,5 @@ for folder in tests/*; do
         ((i++))
     fi
 done
+
+exit $ret
