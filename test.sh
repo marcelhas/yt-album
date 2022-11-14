@@ -131,9 +131,9 @@ yt-album() {
     local sections_file="$1"
     local url="$2"
     if [[ -n "${sections_file-}" ]]; then
-        ./yt-album.sh --no-color --sections "$sections_file" -- "$URL" 2>&1
+        ./yt-album.sh --no-color --no-progress --sections "$sections_file" -- "$URL" 2>&1
     else
-        ./yt-album.sh --no-color -- "$url" 2>&1
+        ./yt-album.sh --no-color --no-progress -- "$url" 2>&1
     fi
 }
 
