@@ -137,8 +137,12 @@ test() {
 yt-album() {
     local sections_file="$1"
     local url="$2"
-    if [[ -n "${sections_file-}" ]]; then
-        ./yt-album.sh --no-color --no-progress --sections "$sections_file" -- "$URL" 2>&1
+    if [[ -n "${sections_file-}" && -n "${url-}" ]]; then
+        ./yt-album.sh --no-color --no-progress \
+            --sections "$sections_file" -- "$url" 2>&1
+    elif [[ -n "${sections_file-}" ]]; then
+        ./yt-album.sh --no-color --no-progress \
+            --sections "$sections_file" -- "$URL" 2>&1
     else
         ./yt-album.sh --no-color --no-progress -- "$url" 2>&1
     fi
