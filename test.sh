@@ -6,13 +6,6 @@ set -euo pipefail
 # e.g. <TRACE=1 ./yt-album.sh>
 if [[ "${TRACE-0}" == "1" ]]; then set -o xtrace; fi
 
-# Debug.
-echo "START env"
-env
-echo "END env"
-yt-dlp --version
-ffmpeg -version
-
 GREEN=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 RED=$(tput setaf 1)
