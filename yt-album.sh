@@ -43,6 +43,8 @@ Options:
     The required format is defined in the README.md.
   --no-color
     Disable colored output.
+  --no-progress
+    Disable download progress bar.
 
 Examples:
   ./yt-album.sh https://www.youtube.com/watch?v=lmvUFhjZdFc
@@ -86,6 +88,9 @@ while :; do
         YELLOW=""
         RED=""
         RESET=""
+        ;;
+    --no-progress)
+        NO_PROGRESS=1
         ;;
     # Anything remaining that starts with a dash triggers a fatal error
     -?*)
@@ -144,7 +149,8 @@ mkdir -p "$CACHE"
 yt-dlp -x --audio-quality 0 --audio-format "$EXT" \
     --split-chapters ${SECTION_FILE:+"--no-split-chapters"} \
     --progress-template "postprocess:[Processing: %(info.title)s ...]" \
-    --quiet --progress --console-title --windows-filenames --restrict-filenames \
+    --quiet --progress ${NO_PROGRESS:+"--no-progress"} --console-title \
+    --windows-filenames --restrict-filenames \
     --print-to-file title "$TMP/title.txt" --print-to-file id "$TMP/id.txt" \
     -o "$CACHE/%(id)s.$EXT" \
     -o "chapter:$OUT/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s" \
