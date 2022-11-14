@@ -13,6 +13,7 @@ RESET=$(tput sgr0)
 
 # Placeholder for an empty URL.
 URL="https://www.youtube.com/watch?v=lmvUFhjZdFc"
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
 usage() {
     cat <<USAGE
@@ -73,6 +74,7 @@ while :; do
 done
 
 main() {
+    clean
     log_header
     local test_number=1
     local exit_code=0
@@ -85,6 +87,11 @@ main() {
     done
 
     exit $exit_code
+}
+
+clean() {
+    rm -rf "${SCRIPT_DIR}/.cache"
+    rm -rf "${SCRIPT_DIR}/sections"
 }
 
 test() {
