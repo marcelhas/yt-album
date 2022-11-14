@@ -115,18 +115,18 @@ test() {
     local actual
     actual="$(yt-album "${sections_file-}" "${url-}")"
 
-    local expected_ls
-    local actual_ls
-    if [[ -f "$folder/ls.txt" ]]; then
-        expected_ls="$(cat "$folder/ls.txt")"
-        actual_ls="$(ls sections)"
+    local expected_wc
+    local actual_wc
+    if [[ -f "$folder/wc.txt" ]]; then
+        expected_wc="$(cat "$folder/wc.txt")"
+        actual_wc="$(wc --bytes sections/*)"
     fi
 
     if ! is_ok "$expected" "$actual"; then
         log_not_ok "$test_number" "$folder" "$expected" "$actual"
         (exit 1)
-    elif ! is_ok "${expected_ls-}" "${actual_ls-}"; then
-        log_not_ok "$test_number" "$folder" "${expected_ls-}" "${actual_ls-}"
+    elif ! is_ok "${expected_wc-}" "${actual_wc-}"; then
+        log_not_ok "$test_number" "$folder" "${expected_wc-}" "${actual_wc-}"
         (exit 2)
     else
         log_ok "$test_number" "$folder"
