@@ -74,19 +74,26 @@ while :; do
 done
 
 main() {
-    clean
     log_header
     local test_number=1
     local exit_code=0
     for folder in tests/*; do
         [[ -f "$folder" ]] && continue
-
+        before_test
         test "$test_number" "$folder" || exit_code=$?
 
         ((test_number++))
     done
-
+    after_tests
     exit $exit_code
+}
+
+before_test() {
+    clean
+}
+
+after_tests() {
+    clean
 }
 
 clean() {
