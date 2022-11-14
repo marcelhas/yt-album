@@ -13,7 +13,7 @@ RESET=$(tput sgr0)
 
 # Placeholder for an empty URL.
 URL="https://www.youtube.com/watch?v=lmvUFhjZdFc"
-SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 usage() {
     cat <<USAGE
@@ -126,7 +126,8 @@ test() {
         log_not_ok "$test_number" "$folder" "$expected" "$actual"
         (exit 1)
     elif ! is_ok "${expected_wc-}" "${actual_wc-}"; then
-        log_not_ok "$test_number" "$folder" "${expected_wc-}" "${actual_wc-}"
+        log_not_ok "$test_number" "$folder" "${expected_wc-}" \
+            "${actual_wc-}"
         (exit 2)
     else
         log_ok "$test_number" "$folder"
