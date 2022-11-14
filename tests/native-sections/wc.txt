@@ -1,26 +1,4 @@
-  6271533 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_001_No_1_Party_Anthem.mp3
-  4332909 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_002_Suck_it_and_See.mp3
-  5644557 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_003_Fire_And_The_Thud.mp3
-  3290925 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_004_The_Bakery.mp3
-  4154541 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_005_Mardy_Bum.mp3
-  6079725 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_006_Snap_Out_of_It.mp3
-  3439725 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_007_Love_Is_A_Laserquest.mp3
-  5032413 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_008_Cornerstone.mp3
-  3462189 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_009_Too_Much_To_Ask.mp3
-  3395277 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_010_No_Buses.mp3
-  4353597 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_011_Mad_Sounds.mp3
-  3580077 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_012_Reckless_Serenade.mp3
-  4584813 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_013_Joining_The_Dots.mp3
-  3102477 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_014_Only_Ones_Who_Know.mp3
-  2615037 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_015_Riot_Van.mp3
-  4487061 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_016_I_Wanna_be_Yours.mp3
-  3652629 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_017_Piledriver_Waltz.mp3
-  4173453 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_018_Secret_Door.mp3
-  3138957 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_019_Fluorescent_Adolescent.mp3
-  4954917 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_020_Bigger_Boys_And_Stolen_Sweethearts.mp3
-  3782829 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_021_Why_d_You_Only_Call_Me_You_re_High.mp3
-  3724053 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_022_Dance_Little_Liar.mp3
-  6044493 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_023_Do_I_Wanna_Know.mp3
-  6179565 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_024_Crying_Lightning.mp3
-  6366909 sections/Arctic_Monkeys_-_Acoustic_15_Full_Album_025_A_Certain_Romance.mp3
-109844661 total
+ 9448029 sections/Slowdive_-_Slowdive_EP_001_Slowdive.mp3
+ 8707053 sections/Slowdive_-_Slowdive_EP_002_Avalyn_I.mp3
+15165765 sections/Slowdive_-_Slowdive_EP_003_Avalyn_II.mp3
+33320847 total
