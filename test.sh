@@ -146,7 +146,7 @@ is_ok() {
 log_ok() {
     local test_number="$1"
     local test_name="$2"
-    printf "${GREEN}ok %s:${RESET} %s\n" "$test_number" "$test_name"
+    printf "${GREEN}ok %s${RESET} - %s\n" "$test_number" "$test_name"
 }
 
 log_not_ok() {
@@ -155,7 +155,7 @@ log_not_ok() {
     local expected="$3"
     local actual="$4"
 
-    printf "${RED}not ok %s:${RESET} %s\n" "$test_number" "$test_name"
+    printf "${RED}not ok %s${RESET} - %s\n" "$test_number" "$test_name"
     if [[ -n "${VERBOSE-}" ]]; then
         log_err "---"
         log_warn "Expected:"
