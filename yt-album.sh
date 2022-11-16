@@ -19,6 +19,18 @@ readonly TMP
 
 trap 'rm -rf -- "$TMP"' EXIT
 
+log_succ() {
+    printf "${GREEN}%s${RESET}\n" "${*}"
+}
+
+log_warn() {
+    printf "${YELLOW}%s${RESET}\n" "${*}" 1>&2
+}
+
+log_err() {
+    printf "${RED}%s${RESET}\n" "${*}" 1>&2
+}
+
 usage() {
     cat <<USAGE
 Usage: ./yt-album.sh URL
@@ -263,18 +275,6 @@ format_section_title() {
     local clean_section_title
     clean_section_title="$(printf "%s" "$section_title" | tr -cs '[:alnum:]-' '_' | sed 's/_*$//')"
     printf "%s.$EXT" "$clean_section_title"
-}
-
-log_succ() {
-    printf "${GREEN}%s${RESET}\n" "${*}"
-}
-
-log_warn() {
-    printf "${YELLOW}%s${RESET}\n" "${*}" 1>&2
-}
-
-log_err() {
-    printf "${RED}%s${RESET}\n" "${*}" 1>&2
 }
 
 main "$@"

@@ -15,6 +15,18 @@ RESET=$(tput sgr0)
 readonly URL="https://www.youtube.com/watch?v=lmvUFhjZdFc"
 readonly DEFAULT_OUTPUT="./test-sections"
 
+log_succ() {
+    printf "${GREEN}%s${RESET}\n" "${*}"
+}
+
+log_warn() {
+    printf "${YELLOW}%s${RESET}\n" "${*}" 1>&2
+}
+
+log_err() {
+    printf "${RED}%s${RESET}\n" "${*}" 1>&2
+}
+
 usage() {
     cat <<USAGE
 Usage: ./test.sh URL
@@ -206,18 +218,6 @@ log_header() {
     # See <https://testanything.org/>.
     printf "%s\n" "TAP version 14"
     printf "%s\n" "1..$count"
-}
-
-log_succ() {
-    printf "${GREEN}%s${RESET}\n" "${*}"
-}
-
-log_warn() {
-    printf "${YELLOW}%s${RESET}\n" "${*}" 1>&2
-}
-
-log_err() {
-    printf "${RED}%s${RESET}\n" "${*}" 1>&2
 }
 
 main
