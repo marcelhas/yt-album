@@ -25,22 +25,26 @@ direnv allow
 > Make sure that URLs do not contain any weird backslashes.
 
 ```bash
-./yt-album.sh https://www.youtube.com/watch?v=lmvUFhjZdFc
+./yt-album.sh -- https://www.youtube.com/watch?v=lmvUFhjZdFc
+# Or with nix
+nix run github:marcelhas/yt-album -- https://www.youtube.com/watch?v=lmvUFhjZdFc
 ```
 
-Your sections will be placed into `./sections/`.
+Your sections will be placed into `./sections/` by default.
 
-If Youtube does not provide section information then you need to manually
-define how to split the album into sections.
-Have a look at the comment section/description of your album, often there
-will be a comment in the correct format.
+## Section File
 
-Copy `sections.template.txt` and make your edits,
-while following its format. Empty lines are ignored.
+> Look at the comment section/description of your video for this!
 
-> (hh:)mm:ss \<Section name\>
+You need to manually define how to split the album into sections
+if Youtube does not provide section information.
 
-```plain
+Create a section file like `./sections.template.txt` and reference it with the `--section` option.
+
+Follow the format: `(hh:)mm:ss <Section name>` like:
+
+```bash
+$ cat sections.template.txt
 00:00 No 1 Party Anthem
 04:01 Suck it and See
 07:11 Fire And The Thud
@@ -48,7 +52,7 @@ while following its format. Empty lines are ignored.
 12:44 Mardy Bum
 15:29 Snap Out of It
 18:58 Love Is A Laserquest
-21:29 ...
+...
 ```
 
 ## License
