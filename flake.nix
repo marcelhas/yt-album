@@ -12,12 +12,18 @@
         mainScriptName = "yt-album";
         testScriptName = "test";
         buildInputs = with pkgs; [ yt-dlp-light ffmpeg ];
-        mainScript = (pkgs.writeScriptBin mainScriptName (builtins.readFile ./yt-album.sh)).overrideAttrs(old: {
-          buildCommand = "${old.buildCommand}\n patchShebangs $out";
-        });
-        testScript = (pkgs.writeScriptBin testScriptName (builtins.readFile ./test.sh)).overrideAttrs(old: {
-          buildCommand = "${old.buildCommand}\n patchShebangs $out";
-        });
+        mainScript = (pkgs.writeScriptBin mainScriptName
+          (builtins.readFile ./yt-album.sh)).overrideAttrs (old: {
+            buildCommand = ''
+              ${old.buildCommand}
+               patchShebangs $out'';
+          });
+        testScript = (pkgs.writeScriptBin testScriptName
+          (builtins.readFile ./test.sh)).overrideAttrs (old: {
+            buildCommand = ''
+              ${old.buildCommand}
+               patchShebangs $out'';
+          });
 
       in rec {
         defaultPackage = packages.yt-album;
@@ -26,24 +32,21 @@
           name = mainScriptName;
           paths = [ mainScript ] ++ buildInputs;
           buildInputs = [ pkgs.makeWrapper ];
-          postBuild = "wrapProgram $out/bin/${mainScriptName} --prefix PATH : $out/bin";
+          postBuild =
+            "wrapProgram $out/bin/${mainScriptName} --prefix PATH : $out/bin";
         };
         # Tests.
         packages.test = pkgs.symlinkJoin {
           name = testScriptName;
           paths = [ testScript ] ++ buildInputs;
           buildInputs = [ pkgs.makeWrapper ];
-          postBuild = "wrapProgram $out/bin/${testScriptName} --prefix PATH : $out/bin";
+          postBuild =
+            "wrapProgram $out/bin/${testScriptName} --prefix PATH : $out/bin";
         };
         # Dev environment.
         devShell = pkgs.mkShell {
-        nativeBuildInputs = [ pkgs.bashInteractive ];
-        buildInputs = with pkgs; [
-          yt-dlp-light
-          ffmpeg
-          nixfmt
-        ];
-      };
-      }
-    );
+          nativeBuildInputs = [ pkgs.bashInteractive ];
+          buildInputs = with pkgs; [ yt-dlp-light ffmpeg nixfmt ];
+        };
+      });
 }
