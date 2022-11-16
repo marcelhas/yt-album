@@ -13,8 +13,7 @@ RESET=$(tput sgr0)
 
 # Placeholder for an empty URL.
 readonly URL="https://www.youtube.com/watch?v=lmvUFhjZdFc"
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-readonly SCRIPT_DIR
+readonly DEFAULT_OUTPUT="./test-sections"
 
 usage() {
     cat <<USAGE
@@ -91,6 +90,7 @@ main() {
 
 before_test() {
     clean
+    setup
 }
 
 after_tests() {
@@ -98,13 +98,18 @@ after_tests() {
 }
 
 clean() {
-    rm -rf "${SCRIPT_DIR}/.cache"
-    rm -rf "${SCRIPT_DIR}/sections"
+    rm -rf "$DEFAULT_OUTPUT"
+}
+
+setup() {
+    mkdir -p "$DEFAULT_OUTPUT"
 }
 
 test() {
     local test_number="$1"
     local folder="$2"
+
+    local out="$DEFAULT_OUTPUT"
 
     local sections_file
     local url
@@ -114,13 +119,13 @@ test() {
     local expected
     expected=$(cat "$folder/expected.txt")
     local actual
-    actual="$(yt-album "${sections_file-}" "${url-}")"
+    actual="$(yt-album "${sections_file-}" "${url-}" "$out")"
 
     local expected_ffprobe
     local actual_ffprobe
     if [[ -f "$folder/ffprobe.txt" ]]; then
         expected_ffprobe="$(cat "$folder/ffprobe.txt")"
-        actual_ffprobe="$(ffprobe_durations)"
+        actual_ffprobe="$(ffprobe_durations "$out")"
     fi
 
     if ! is_ok "$expected" "$actual"; then
@@ -139,20 +144,24 @@ test() {
 yt-album() {
     local sections_file="$1"
     local url="$2"
+    local out="$3"
+
     if [[ -n "${sections_file-}" && -n "${url-}" ]]; then
-        ./yt-album.sh --no-color --no-progress \
+        ./yt-album.sh --no-color --no-progress --output "$out" \
             --sections "$sections_file" -- "$url" 2>&1
     elif [[ -n "${sections_file-}" ]]; then
-        ./yt-album.sh --no-color --no-progress \
+        ./yt-album.sh --no-color --no-progress --output "$out" \
             --sections "$sections_file" -- "$URL" 2>&1
     else
-        ./yt-album.sh --no-color --no-progress -- "$url" 2>&1
+        ./yt-album.sh --no-color --no-progress --output "$out" \
+            -- "$url" 2>&1
     fi
 }
 
 ffprobe_durations() {
+    local out="$1"
     local res=""
-    for file in ./sections/*; do
+    for file in "$1"/*; do
         [[ ! -f "$file" ]] && continue
         res+="$(basename "$file")"
         res+=$'\n'
