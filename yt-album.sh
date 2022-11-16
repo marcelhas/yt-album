@@ -11,23 +11,12 @@ YELLOW=$(tput setaf 3)
 RED=$(tput setaf 1)
 RESET=$(tput sgr0)
 
-log_succ() {
-    printf "${GREEN}%s${RESET}\n" "${*}"
-}
-
-log_warn() {
-    printf "${YELLOW}%s${RESET}\n" "${*}" 1>&2
-}
-
-log_err() {
-    printf "${RED}%s${RESET}\n" "${*}" 1>&2
-}
-
-log_success_msg() {
-    local path
-    path="$(basename "$1")"
-    log_succ "Done. Your sections are in ./$path."
-}
+readonly EXT="mp3"
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+readonly OUT="$SCRIPT_DIR/sections"
+readonly CACHE="$SCRIPT_DIR/.cache"
+TMP="$(mktemp -d)"
+trap 'rm -rf -- "$TMP"' EXIT
 
 usage() {
     cat <<USAGE
@@ -104,6 +93,34 @@ while :; do
     shift
 done
 
+main() {
+    local URL="$1"
+
+    cmd_exists_or_exit "yt-dlp"
+    # ffmpeg is only required if a section file is provided.
+    [[ -n "${SECTION_FILE-}" ]] && cmd_exists_or_exit "ffmpeg" && valid_section_file_or_exit "$SECTION_FILE"
+
+    # Prepare environment.
+    clean
+    mkdirs
+
+    # Download URL and split into sections if no section file is provided.
+    download "$URL" "$EXT" "$OUT"
+
+    if [[ -z "${SECTION_FILE-}" ]]; then
+        # Done.
+        log_success_msg "$OUT"
+        exit 0
+    fi
+
+    # Split into sections if section file is provided.
+    local id
+    id=$(cat "$TMP/id.txt")
+    process_section_file "TITLE" "$CACHE/$id.$EXT"
+
+    log_success_msg "$OUT"
+}
+
 cmd_exists_or_exit() {
     local cmd="$1"
     if ! command -v "$cmd" &>/dev/null; then
@@ -129,52 +146,95 @@ valid_section_file_or_exit() {
     fi
 }
 
-cmd_exists_or_exit "yt-dlp"
-# ffmpeg is only required if a section file is provided.
-[[ -n "${SECTION_FILE-}" ]] && cmd_exists_or_exit "ffmpeg" && valid_section_file_or_exit "$SECTION_FILE"
+clean() {
+    rm -rf "$OUT"
+}
 
-readonly URL="$1"
-readonly EXT="mp3"
-SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-readonly OUT="$SCRIPT_DIR/sections"
-readonly CACHE="$SCRIPT_DIR/.cache"
-TMP="$(mktemp -d)"
-trap 'rm -rf -- "$TMP"' EXIT
+mkdirs() {
+    mkdir -p "$OUT"
+    mkdir -p "$CACHE"
+}
 
-rm -rf "$OUT"
-mkdir -p "$OUT"
-mkdir -p "$CACHE"
+log_success_msg() {
+    local path
+    path="$(basename "$1")"
+    log_succ "Done. Your sections are in ./$path."
+}
 
-# Download and maybe split into sections.
-yt-dlp -x --audio-quality 0 --audio-format "$EXT" \
-    --split-chapters ${SECTION_FILE:+"--no-split-chapters"} \
-    --progress-template "postprocess:[Processing: %(info.title)s ...]" \
-    --quiet --progress ${NO_PROGRESS:+"--no-progress"} --console-title \
-    --windows-filenames --restrict-filenames \
-    --print-to-file title "$TMP/title.txt" --print-to-file id "$TMP/id.txt" \
-    -o "$CACHE/%(id)s.$EXT" \
-    -o "chapter:$OUT/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s" \
-    "$URL"
-printf "\n"
+download() {
+    local url="$1"
+    local ext="$2"
+    local out="$3"
 
-if [[ -z "${SECTION_FILE-}" ]]; then
-    # Done.
-    log_success_msg "$OUT"
-    exit 0
-fi
+    # Download and split into sections if a section file is given.
+    yt-dlp -x --audio-quality 0 --audio-format "$ext" \
+        --split-chapters ${SECTION_FILE:+"--no-split-chapters"} \
+        --progress-template "postprocess:[Processing: %(info.title)s ...]" \
+        --quiet --progress ${NO_PROGRESS:+"--no-progress"} --console-title \
+        --windows-filenames --restrict-filenames \
+        --print-to-file title "$TMP/title.txt" --print-to-file id "$TMP/id.txt" \
+        -o "$CACHE/%(id)s.$EXT" \
+        -o "chapter:$out/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s" \
+        "$url"
+    printf "\n"
+}
+
+process_section_file() {
+    local title="$1"
+    local video_path="$2"
+
+    local prepared_section_file
+    prepared_section_file=$(prepare_section_file)
+
+    section_number=1
+    # Split the downloaded video into sections.
+    while read -r start end section_name; do
+        echo "$start - $end - $section_name"
+        section_title="$(format_section_title "$title" "$section_number" "$section_name")"
+        target_file="$OUT/$section_title"
+        ffmpeg -hide_banner -loglevel warning -nostdin -y \
+            -ss "$start" -to "$end" \
+            -i "$video_path" -codec copy \
+            "$target_file"
+
+        # Sanity check filesize, because ffmpeg does not always warn.
+        minimum_size=5000
+        actual_size=$(wc -c <"$target_file")
+        if [[ $actual_size -lt $minimum_size ]]; then
+            log_warn \
+                "File is very small! Check if $SECTION_FILE matches your video."
+        fi
+        ((section_number++))
+    done <<<"$prepared_section_file"
+}
 
 # Preprocess $SECTION_FILE into a single file in the format:
 # 00:00 04:01 No 1 Party Anthem
 # 04:01 07:11 Suck It and See
-# Remove empty lines.
-readonly clean="$TMP/clean.txt"
-awk '!/^[[:blank:]]*$/' "$SECTION_FILE" >"$clean"
-cut -d" " --field 1 "$clean" >"$TMP/first.txt"
-tail "$TMP/first.txt" --lines +2 >"$TMP/second.txt"
-echo "99:59:59" >>"$TMP/second.txt"
-cut -d" " --field 2- "$clean" >"$TMP/third.txt"
-# Merge the three files into a single file.
-paste "$TMP/first.txt" "$TMP/second.txt" "$TMP/third.txt" >"$TMP/out.txt"
+# ...
+prepare_section_file() {
+    # Remove empty lines.
+    local no_newlines
+    no_newlines=$(awk '!/^[[:blank:]]*$/' "$SECTION_FILE")
+
+    # 00:00
+    local first_column
+    first_column="$(printf %s "$no_newlines" | cut -d" " --field 1)"
+
+    # 04:01
+    local second_column
+    # Skip first row and append 99:59:59 at the end.
+    second_column="$(tail --lines +2 <(printf "%s\n%s\n" "$first_column" "99:59:59"))"
+
+    # No 1 Party Anthem
+    local third_column
+    third_column=$(cut -d" " --field 2- <(printf %s "$no_newlines"))
+
+    # Merge the three files into a single file.
+    local merged
+    merged=$(paste <(printf %s "$first_column") <(printf %s "$second_column") <(printf %s "$third_column"))
+    printf "%s" "$merged"
+}
 
 format_section_title() {
     local album_title="$1"
@@ -187,27 +247,16 @@ format_section_title() {
     printf "%s.$EXT" "$clean_section_title"
 }
 
-album_title="$(cat "$TMP/title.txt")"
-id="$(cat "$TMP/id.txt")"
-i=1
-# Split the downloaded video into sections.
-while read -r start end section_name; do
-    echo "$start - $end - $section_name"
-    section_title="$(format_section_title "$album_title" "$i" "$section_name")"
-    target_file="$OUT/$section_title"
-    ffmpeg -hide_banner -loglevel warning -nostdin -y \
-        -ss "$start" -to "$end" \
-        -i "$CACHE/$id.$EXT" -codec copy \
-        "$target_file"
+log_succ() {
+    printf "${GREEN}%s${RESET}\n" "${*}"
+}
 
-    # Sanity check filesize, because ffmpeg does not always warn.
-    minimum_size=5000
-    actual_size=$(wc -c <"$target_file")
-    if [[ $actual_size -lt $minimum_size ]]; then
-        log_warn \
-            "File is very small! Check if $SECTION_FILE matches your video."
-    fi
-    ((i++))
-done <"$TMP/out.txt"
+log_warn() {
+    printf "${YELLOW}%s${RESET}\n" "${*}" 1>&2
+}
 
-log_success_msg "$OUT"
+log_err() {
+    printf "${RED}%s${RESET}\n" "${*}" 1>&2
+}
+
+main "$@"
