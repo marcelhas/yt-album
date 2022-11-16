@@ -245,7 +245,7 @@ process_section_file() {
 prepare_section_file() {
     # Remove empty lines.
     local no_newlines
-    no_newlines=$(awk '!/^[[:blank:]]*$/' "$SECTION_FILE")
+    no_newlines=$(strip_newlines "$SECTION_FILE")
 
     # 00:00
     local first_column
@@ -264,6 +264,11 @@ prepare_section_file() {
     local merged
     merged=$(paste <(printf %s "$first_column") <(printf %s "$second_column") <(printf %s "$third_column"))
     printf "%s" "$merged"
+}
+
+strip_newlines() {
+    local file="$1"
+    sed '/^$/d' "$file"
 }
 
 format_section_title() {
