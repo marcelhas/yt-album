@@ -54,6 +54,7 @@ Options:
 Examples:
   ./yt-album.sh https://www.youtube.com/watch?v=lmvUFhjZdFc
   ./yt-album.sh --sections sections.txt -- https://www.youtube.com/watch?v=lmvUFhjZdFc
+  ./yt-album.sh --output ~/Music/ -- https://www.youtube.com/watch?v=lmvUFhjZdFc
 # Debug mode
 TRACE=1 ./yt-album.sh https://www.youtube.com/watch?v=lmvUFhjZdFc
 
