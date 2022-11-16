@@ -13,9 +13,12 @@ RESET=$(tput sgr0)
 
 readonly EXT="mp3"
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+readonly SCRIPT_DIR
 readonly OUT="$SCRIPT_DIR/sections"
 readonly CACHE="$SCRIPT_DIR/.cache"
 TMP="$(mktemp -d)"
+readonly TMP
+
 trap 'rm -rf -- "$TMP"' EXIT
 
 usage() {

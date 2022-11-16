@@ -12,8 +12,9 @@ RED=$(tput setaf 1)
 RESET=$(tput sgr0)
 
 # Placeholder for an empty URL.
-URL="https://www.youtube.com/watch?v=lmvUFhjZdFc"
+readonly URL="https://www.youtube.com/watch?v=lmvUFhjZdFc"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+readonly SCRIPT_DIR
 
 usage() {
     cat <<USAGE
@@ -156,7 +157,7 @@ ffprobe_durations() {
         res+="$(basename "$file")"
         res+=$'\n'
         line="$(ffprobe -v error -show_entries format=duration \
-                 -of default=noprint_wrappers=1:nokey=1 "$file")"
+            -of default=noprint_wrappers=1:nokey=1 "$file")"
         res+="$line"
         res+=$'\n'
     done
