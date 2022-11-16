@@ -129,7 +129,9 @@ main() {
     # Split into sections if section file is provided.
     local id
     id=$(cat "$TMP/id.txt")
-    process_section_file "TITLE" "$CACHE/$id.$EXT" "$OUT"
+    local title
+    title=$(cat "$TMP/title.txt")
+    process_section_file "$title" "$CACHE/$id.$EXT" "$OUT"
 
     log_success_msg "$OUT"
 }
