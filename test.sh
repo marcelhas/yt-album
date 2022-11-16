@@ -115,19 +115,19 @@ test() {
     local actual
     actual="$(yt-album "${sections_file-}" "${url-}")"
 
-    local expected_wc
-    local actual_wc
-    if [[ -f "$folder/wc.txt" ]]; then
-        expected_wc="$(cat "$folder/wc.txt")"
-        actual_wc="$(wc --bytes sections/*)"
+    local expected_ffprobe
+    local actual_ffprobe
+    if [[ -f "$folder/ffprobe.txt" ]]; then
+        expected_ffprobe="$(cat "$folder/ffprobe.txt")"
+        actual_ffprobe="$(ffprobe_durations)"
     fi
 
     if ! is_ok "$expected" "$actual"; then
         log_not_ok "$test_number" "$folder" "$expected" "$actual"
         (exit 1)
-    elif ! is_ok "${expected_wc-}" "${actual_wc-}"; then
-        log_not_ok "$test_number" "$folder" "${expected_wc-}" \
-            "${actual_wc-}"
+    elif ! is_ok "${expected_ffprobe-}" "${actual_ffprobe-}"; then
+        log_not_ok "$test_number" "$folder" "${expected_ffprobe-}" \
+            "${actual_ffprobe-}"
         (exit 2)
     else
         log_ok "$test_number" "$folder"
@@ -147,6 +147,20 @@ yt-album() {
     else
         ./yt-album.sh --no-color --no-progress -- "$url" 2>&1
     fi
+}
+
+ffprobe_durations() {
+    local res=""
+    for file in ./sections/*; do
+        [[ ! -f "$file" ]] && continue
+        res+="$(basename "$file")"
+        res+=$'\n'
+        line="$(ffprobe -v error -show_entries format=duration \
+                 -of default=noprint_wrappers=1:nokey=1 "$file")"
+        res+="$line"
+        res+=$'\n'
+    done
+    printf "%s" "$res"
 }
 
 is_ok() {
