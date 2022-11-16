@@ -133,20 +133,22 @@ main() {
     # Download URL and split into sections if no section file is provided.
     download "$URL" "$EXT" "$OUT"
 
-    if [[ -z "${SECTION_FILE-}" ]]; then
-        # Done.
-        log_success_msg "$OUT"
-        exit 0
+    if [[ -n "${SECTION_FILE-}" ]]; then
+        # Split into sections if section file is provided.
+        local id
+        id=$(cat "$TMP/id.txt")
+        local title
+        title=$(cat "$TMP/title.txt")
+        process_section_file "$title" "$CACHE/$id.$EXT" "$OUT"
     fi
 
-    # Split into sections if section file is provided.
-    local id
-    id=$(cat "$TMP/id.txt")
-    local title
-    title=$(cat "$TMP/title.txt")
-    process_section_file "$title" "$CACHE/$id.$EXT" "$OUT"
-
-    log_success_msg "$OUT"
+    if is_ok "$OUT"; then
+        log_success_msg "$OUT"
+        exit 0
+    else
+        log_err "$OUT is empty! Try to provide a section file and check the output option."
+        exit 4
+    fi
 }
 
 cmd_exists_or_exit() {
@@ -185,12 +187,6 @@ mkdirs() {
     mkdir -p "$CACHE"
 }
 
-log_success_msg() {
-    local path
-    path="$(basename "$1")"
-    log_succ "Done. Your sections are in ./$path."
-}
-
 download() {
     local url="$1"
     local ext="$2"
@@ -207,6 +203,18 @@ download() {
         -o "chapter:$out/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s" \
         "$url"
     printf "\n"
+}
+
+is_ok() {
+    local out="$1"
+    section_count=$(find "$out" -type f | wc -l)
+    [[ $section_count -gt 0 ]]
+}
+
+log_success_msg() {
+    local path
+    path="$(basename "$1")"
+    log_succ "Done. Your sections are in ./$path."
 }
 
 process_section_file() {
