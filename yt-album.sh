@@ -163,7 +163,7 @@ valid_section_file_or_exit() {
     set +e
     local res
     res="$(grep --perl-regexp --line-number --initial-tab --invert-match \
-        "^(\d+:)?(0|1|2|3|4|5)?\d:(0|1|2|3|4|5)\d\s.*$" "$file")"
+        "^(\d+:)?(0|1|2|3|4|5)?((\d:(0|1|2|3|4|5)\d\s.*)|\s*)$" "$file")"
     set -e
     if [[ -n $res ]]; then
         log_err "The following lines in $file are not in the correct format."
