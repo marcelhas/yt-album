@@ -11,11 +11,9 @@ YELLOW=$(tput setaf 3)
 RED=$(tput setaf 1)
 RESET=$(tput sgr0)
 
+readonly CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/yt-album"
+readonly DEFAULT_OUTPUT="./sections"
 readonly EXT="mp3"
-SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-readonly SCRIPT_DIR
-readonly OUT="$SCRIPT_DIR/sections"
-readonly CACHE="$SCRIPT_DIR/.cache"
 TMP="$(mktemp -d)"
 readonly TMP
 
@@ -33,6 +31,9 @@ Options:
   --sections FILE
     Split the downloaded video into sections defined in FILE.
     The required format is defined in the README.md.
+  --output DIR
+    Output directory for the downloaded files.
+    Default: $DEFAULT_OUTPUT
   --no-color
     Disable colored output.
   --no-progress
@@ -75,6 +76,14 @@ while :; do
             die "The command option --sections requires a path to a file"
         fi
         ;;
+    --output)
+        if [[ -n "$2" && -d "$2" ]]; then
+            OUTPUT="$2"
+            shift
+        else
+            die "The command option --output requires a path to a directory"
+        fi
+        ;;
     --no-color)
         GREEN=""
         YELLOW=""
@@ -98,14 +107,15 @@ done
 
 main() {
     local URL="$1"
+    local OUT="${OUTPUT:-$DEFAULT_OUTPUT}"
 
     cmd_exists_or_exit "yt-dlp"
     # ffmpeg is only required if a section file is provided.
     [[ -n "${SECTION_FILE-}" ]] && cmd_exists_or_exit "ffmpeg" && valid_section_file_or_exit "$SECTION_FILE"
 
     # Prepare environment.
-    clean
-    mkdirs
+    clean "$OUT"
+    mkdirs "$OUT"
 
     # Download URL and split into sections if no section file is provided.
     download "$URL" "$EXT" "$OUT"
@@ -119,7 +129,7 @@ main() {
     # Split into sections if section file is provided.
     local id
     id=$(cat "$TMP/id.txt")
-    process_section_file "TITLE" "$CACHE/$id.$EXT"
+    process_section_file "TITLE" "$CACHE/$id.$EXT" "$OUT"
 
     log_success_msg "$OUT"
 }
@@ -150,11 +160,13 @@ valid_section_file_or_exit() {
 }
 
 clean() {
-    rm -rf "$OUT"
+    local out="$1"
+    rm -rf "$out"
 }
 
 mkdirs() {
-    mkdir -p "$OUT"
+    local out="$1"
+    mkdir -p "$out"
     mkdir -p "$CACHE"
 }
 
@@ -185,6 +197,7 @@ download() {
 process_section_file() {
     local title="$1"
     local video_path="$2"
+    local out="$3"
 
     local prepared_section_file
     prepared_section_file=$(prepare_section_file)
@@ -194,7 +207,7 @@ process_section_file() {
     while read -r start end section_name; do
         echo "$start - $end - $section_name"
         section_title="$(format_section_title "$title" "$section_number" "$section_name")"
-        target_file="$OUT/$section_title"
+        target_file="$out/$section_title"
         ffmpeg -hide_banner -loglevel warning -nostdin -y \
             -ss "$start" -to "$end" \
             -i "$video_path" -codec copy \
