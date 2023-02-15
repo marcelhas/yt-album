@@ -2,7 +2,26 @@
 
 Download an album from Youtube and split it into sections.
 
+## Usage
+
+> Make sure that URLs do not contain any weird backslashes.
+
+```bash
+# With nix.
+nix run github:marcelhas/yt-album -- "https://www.youtube.com/watch?v=lmvUFhjZdFc"
+# With custom sections.
+nix run github:marcelhas/yt-album -- --sections ./sections.txt "https://www.youtube.com/watch?v=lmvUFhjZdFc"
+# With custom output directory. Directory must already exist!
+nix run github:marcelhas/yt-album -- --output ./out/ "https://www.youtube.com/watch?v=lmvUFhjZdFc"
+# With Bash (see #Setup).
+./yt-album.sh -- "https://www.youtube.com/watch?v=lmvUFhjZdFc"
+```
+
+Your sections will be placed into `./sections/` by default.
+
 ## Setup
+
+> Not required for nix!
 
 `yt-dlp` and `ffmpeg` are required to run this script.
 
@@ -12,36 +31,17 @@ ffmpeg --version
 yt-dlp --version
 ```
 
-If you use nix you can run:
+## Sections
 
-```bash
-nix develop
-# Or if you use direnv
-direnv allow
-```
+> Look at the comment section and description of your video for this!
 
-## Usage
+You can manually define how to split an album into sections.
+Each section is only defined by its start time, 
+its end time is implicitly the start of the next section.
 
-> Make sure that URLs do not contain any weird backslashes.
-
-```bash
-./yt-album.sh -- https://www.youtube.com/watch?v=lmvUFhjZdFc
-# Or with nix
-nix run github:marcelhas/yt-album -- https://www.youtube.com/watch?v=lmvUFhjZdFc
-```
-
-Your sections will be placed into `./sections/` by default.
-
-## Section File
-
-> Look at the comment section/description of your video for this!
-
-You need to manually define how to split the album into sections
-if Youtube does not provide section information.
-
-Create a section file like `./sections.template.txt` and reference it with the `--section` option.
-
-Follow the format: `(hh:)mm:ss <Section name>` like:
+Create a section file like `./sections.template.txt` and reference it
+ with the `--sections` option.
+Follow the format `[hh:]mm:ss <Section name>`, as in:
 
 ```bash
 $ cat sections.template.txt
@@ -52,6 +52,7 @@ $ cat sections.template.txt
 12:44 Mardy Bum
 15:29 Snap Out of It
 18:58 Love Is A Laserquest
+02:59:59 This is the End
 ...
 ```
 
