@@ -300,7 +300,7 @@ format_section_title() {
     local section_name="$3"
     local section_title="${album_title}_${section_nr}_${section_name}"
     local clean_section_title
-    clean_section_title="$(printf "%s" "$section_title" | tr -cs '[:alnum:]-' '_' | sed 's/_*$//')"
+    clean_section_title="$(slugify "$section_title")"
     printf "%s.$EXT" "$clean_section_title"
 }
 
