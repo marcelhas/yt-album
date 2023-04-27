@@ -89,10 +89,19 @@ main() {
     log_header
     local test_number=1
     local exit_code=0
+
     for folder in tests/*; do
         [[ -f "$folder" ]] && continue
+
         before_test
-        test "$test_number" "$folder" || exit_code=$?
+        set +e
+        test "$test_number" "$folder"
+
+        local ret="$?"
+        if [[ $ret != "0" && $exit_code == "0" ]]; then
+            exit_code="$ret"
+        fi
+        set -e
 
         ((test_number++))
     done
