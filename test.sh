@@ -179,7 +179,7 @@ ffprobe_durations() {
         res+=$'\n'
         line="$(ffprobe -v error -show_entries format=duration \
             -of default=noprint_wrappers=1:nokey=1 "$file")"
-        res+="$line"
+        res+="$(LC_ALL=C printf "%.0f\n" "$line")"
         res+=$'\n'
     done
     printf "%s" "$res"
