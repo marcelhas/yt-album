@@ -135,23 +135,31 @@ main() {
     # Update output folder based on video title.
     local title
     title="$(cat "$TMP/title.txt")"
-    title="$(slugify "$title")"
-    OUT="$OUT/$title"
+    slug="$(slugify "$title")"
+    out_slug="$OUT/$slug"
 
+    local id
+    id=$(cat "$TMP/id.txt")
 
     if [[ -n "${SECTION_FILE-}" ]]; then
         # Split into sections if section file is provided.
-        mkdir "$OUT"
-        local id
-        id=$(cat "$TMP/id.txt")
-        process_section_file "$title" "$CACHE/$id.$EXT" "$OUT"
+        mkdir "$out_slug"
+        process_section_file "$title" "$CACHE/$id.$EXT" "$out_slug"
+    else
+        if [[ -d "$OUT/$id" ]]; then
+            # Move native result.
+            mv "$OUT/$id" "$out_slug"
+        else
+            # Handle no-files test.
+            mkdir "$out_slug"
+        fi
     fi
 
-    if is_ok "$OUT"; then
-        log_success_msg "$OUT"
+    if is_ok "$out_slug"; then
+        log_success_msg "$out_slug"
         exit 0
     else
-        log_err "$OUT is empty! Try to provide a section file and check the output option."
+        log_err "$out_slug is empty! Try to provide a section file and check the output option."
         exit 4
     fi
 }
@@ -200,7 +208,7 @@ download() {
         --windows-filenames --restrict-filenames \
         --print-to-file title "$TMP/title.txt" --print-to-file id "$TMP/id.txt" \
         -o "$CACHE/%(id)s.$EXT" \
-        -o "chapter:$out/%(title)s/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s" \
+        -o "chapter:$out/%(id)s/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s" \
         "$url"
     printf "\n"
 }

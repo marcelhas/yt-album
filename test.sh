@@ -146,7 +146,9 @@ test() {
     local actual_ffprobe
     if [[ -f "$folder/ffprobe.txt" ]]; then
         expected_ffprobe="$(cat "$folder/ffprobe.txt")"
-        actual_ffprobe="$(ffprobe_durations "$out")"
+        local title
+        title="$(cat "$folder/title.txt")"
+        actual_ffprobe="$(ffprobe_durations "$out/$title")"
     fi
 
     if ! is_ok "$expected" "$actual"; then
