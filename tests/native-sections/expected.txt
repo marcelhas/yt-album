@@ -1,2 +1,2 @@
 [Processing: Slowdive - Slowdive EP ...][Processing: Slowdive - Slowdive EP ...][Processing: Slowdive - Slowdive EP ...][Processing: Slowdive - Slowdive EP ...][Processing: Slowdive - Slowdive EP ...][Processing: Slowdive - Slowdive EP ...]
-Done. Your sections are in ./test-sections.
+Done. Your sections are in ./test-sections/slowdive-slowdive-ep

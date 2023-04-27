@@ -1,10 +1,10 @@
-The_Microphones_-_Something_001_One.mp3
+the-microphones-something-001-one.mp3
 19
-The_Microphones_-_Something_002_Two.mp3
+the-microphones-something-002-two.mp3
 19
-The_Microphones_-_Something_003_Three.mp3
+the-microphones-something-003-three.mp3
 27
-The_Microphones_-_Something_004_Four.mp3
+the-microphones-something-004-four.mp3
 7
-The_Microphones_-_Something_005_Five.mp3
+the-microphones-something-005-five.mp3
 19
