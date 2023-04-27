@@ -127,18 +127,23 @@ main() {
     [[ -n "${SECTION_FILE-}" ]] && cmd_exists_or_exit "ffmpeg" && valid_section_file_or_exit "$SECTION_FILE"
 
     # Prepare environment.
-    clean "$OUT"
     mkdirs "$OUT"
 
     # Download URL and split into sections if no section file is provided.
     download "$URL" "$EXT" "$OUT"
 
+    # Update output folder based on video title.
+    local title
+    title="$(cat "$TMP/title.txt")"
+    title="$(slugify "$title")"
+    OUT="$OUT/$title"
+
+
     if [[ -n "${SECTION_FILE-}" ]]; then
         # Split into sections if section file is provided.
+        mkdir "$OUT"
         local id
         id=$(cat "$TMP/id.txt")
-        local title
-        title=$(cat "$TMP/title.txt")
         process_section_file "$title" "$CACHE/$id.$EXT" "$OUT"
     fi
 
@@ -176,11 +181,6 @@ valid_section_file_or_exit() {
     fi
 }
 
-clean() {
-    local out="$1"
-    rm -rf "$out"
-}
-
 mkdirs() {
     local out="$1"
     mkdir -p "$out"
@@ -200,9 +200,14 @@ download() {
         --windows-filenames --restrict-filenames \
         --print-to-file title "$TMP/title.txt" --print-to-file id "$TMP/id.txt" \
         -o "$CACHE/%(id)s.$EXT" \
-        -o "chapter:$out/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s" \
+        -o "chapter:$out/%(title)s/%(title)s_%(section_number)03d_%(section_title)s.%(ext)s" \
         "$url"
     printf "\n"
+}
+
+# See <https://gist.github.com/oneohthree/f528c7ae1e701ad990e6>.
+slugify() {
+    echo "$1" | iconv -t ascii//TRANSLIT | sed -r s/[^a-zA-Z0-9]+/-/g | sed -r s/^-+\|-+$//g | tr "[:upper:]" "[:lower:]"
 }
 
 is_ok() {
@@ -213,8 +218,8 @@ is_ok() {
 
 log_success_msg() {
     local path
-    path="$(basename "$1")"
-    log_succ "Done. Your sections are in ./$path."
+    path="$1"
+    log_succ "Done. Your sections are in $path"
 }
 
 process_section_file() {
