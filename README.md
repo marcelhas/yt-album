@@ -1,16 +1,18 @@
 # yt-album
 
-Download an album from Youtube and split it into sections.
+Download an album from Youtube and split it into mp3 sections based on timestamps
+commonly found in the comments or description.
 
 ## Usage
+> Make sure that the URL does not contain backslashes.
 
-> Make sure that URLs do not contain any weird backslashes.
-
-```bash
+```sh
 # With nix.
 nix run github:marcelhas/yt-album -- "https://www.youtube.com/watch?v=lmvUFhjZdFc"
 # With custom sections.
 nix run github:marcelhas/yt-album -- --sections ./sections.txt "https://www.youtube.com/watch?v=lmvUFhjZdFc"
+# Use auto-updated branch if yt-dlp fails (check open pull requests for the correct number).
+nix run github:marcelhas/yt-album/pull/10/head -- "https://www.youtube.com/watch?v=lmvUFhjZdFc"
 # With custom output directory. Directory must already exist!
 nix run github:marcelhas/yt-album -- --output ./out/ "https://www.youtube.com/watch?v=lmvUFhjZdFc"
 # With Bash (see #Setup).
@@ -33,17 +35,17 @@ yt-dlp --version
 
 ## Sections
 
-> Look at the comment section and description of your video for this!
+> Look at the comment section and description of your album for this!
 
 You can manually define how to split an album into sections.
-Each section is only defined by its start time, 
+Each section is defined by its start time,
 its end time is implicitly the start of the next section.
 
 Create a section file like `./sections.template.txt` and reference it
- with the `--sections` option.
+with the `--sections` option.
 Follow the format `[hh:]mm:ss <Section name>`, as in:
 
-```bash
+```sh
 $ cat sections.template.txt
 00:00 No 1 Party Anthem
 04:01 Suck it and See
