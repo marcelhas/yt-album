@@ -11,7 +11,7 @@
         pkgs = nixpkgs.legacyPackages.${system};
         mainScriptName = "yt-album";
         testScriptName = "test";
-        buildInputs = with pkgs; [ yt-dlp-light ffmpeg ];
+        buildInputs = with pkgs; [ deno ffmpeg yt-dlp-light ];
         mainScript = (pkgs.writeScriptBin mainScriptName
           (builtins.readFile ./yt-album.sh)).overrideAttrs (old: {
             buildCommand = ''
@@ -46,7 +46,7 @@
         # Dev environment.
         devShell = pkgs.mkShell {
           nativeBuildInputs = [ pkgs.bashInteractive ];
-          buildInputs = with pkgs; [ yt-dlp-light ffmpeg nixfmt ];
+          buildInputs = with pkgs; [ deno ffmpeg nixfmt yt-dlp-light ];
         };
       });
 }
